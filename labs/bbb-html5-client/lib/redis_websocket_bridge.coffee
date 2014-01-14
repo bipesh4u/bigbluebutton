@@ -166,27 +166,16 @@ module.exports = class RedisWebsocketBridge
   _emitToClients2: (channel, message) ->
 
     console.log("\n\nin _emitToClients2 ***message: ")
-    #console.log (message.toString().length)
     console.log message 
     channelViewers = @io.sockets.in(channel)
     console.log("**message name**: ")
     if typeof message.header is "undefined"
-      console.log ("CASE 001-undefineeeed")
       eventName = message.name
     else
-      console.log ("CASE 002- NOT EMPTYYY")
-      console.log (message.header)
       if typeof message.header.name is "undefined"
-        console.log ("CASE 002.1-undefineeeed nameee")
         eventName = message.name
       else
-        console.log ("CASE 002.2 nameee")
-        console.log (message.header.name)
         eventName = message.header.name
-
-  #  if message is not null and message.header is not null and typeof message.header.name isnt "undefined" 
-    #  eventName = message.header.name
-   # else eventName = message.name
 
     console.log(eventName);
     channelViewers.emit.apply(channelViewers, [eventName, message])
