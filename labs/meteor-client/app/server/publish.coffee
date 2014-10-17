@@ -1,6 +1,20 @@
 # Publish only the users that are in the particular meetingId
 # On the client side we pass the meetingId parameter
-Meteor.publish 'users', (meetingId) ->
+Meteor.publish 'users', (meetingId, userid) ->
+  console.log "publishing users, here the userid=#{userid}"
+
+  console.log "before userId was:#{@userId}"
+  @userId = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?._id
+  console.log "and now: #{@userId}"
+
+  @_session.socket.on("close", Meteor.bindEnvironment(=>
+      console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\nconnection.id=#{@connection.id}\nuserId = #{@userId}\n"
+      dbid = @userId
+      bbbUserId = Meteor.Users.findOne({'_id': dbid, 'meetingId': meetingId})?.userId
+      # inform bbb-apps that the user has left
+      requestUserLeaving(meetingId, bbbUserId, dbid)
+    )
+  )
   Meteor.Users.find({meetingId: meetingId}, {fields: { 'userId': 0, 'user.userid': 0, 'user.extern_userid': 0, 'user.voiceUser.userid': 0, 'user.voiceUser.web_userid': 0 }})
 
 Meteor.publish 'chat', (meetingId, userid) ->

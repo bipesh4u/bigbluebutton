@@ -36,7 +36,7 @@
     onBeforeAction: ->
       self = @
       # Have to check on the server whether the credentials the user has are valid on db, without being able to spam requests for credentials
-      Meteor.subscribe 'users', getInSession('meetingId'), -> # callback for after users have been loaded on client
+      Meteor.subscribe 'users', getInSession('meetingId'), getInSession("userId"), -> # callback for after users have been loaded on client
         Meteor.subscribe 'chat', getInSession('meetingId'), getInSession("userId"), ->
           Meteor.subscribe 'shapes', getInSession('meetingId'), ->
             Meteor.subscribe 'slides', getInSession('meetingId'), ->

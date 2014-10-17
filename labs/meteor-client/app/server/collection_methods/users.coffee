@@ -132,6 +132,7 @@ Meteor.methods
 # After authorization, publish a user_leaving_request in redis
 # params: meetingid, userid as defined in BBB-Apps, the _id user identifier in mongo
 @requestUserLeaving = (meetingId, userId, user_id) ->
+	console.log "in requestUserLeaving #{meetingId}, #{userId}, #{user_id}"
 	u = Meteor.Users.findOne({'meetingId': meetingId, 'userId': userId, _id: user_id})
 	if u?
 		message =
