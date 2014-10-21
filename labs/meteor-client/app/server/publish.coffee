@@ -9,14 +9,18 @@ Meteor.publish 'users', (meetingId, userid) ->
   console.log "and now: #{@userId}"
 
   @_session.socket.on("close", Meteor.bindEnvironment(=>
-      console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\nconnection.id=#{@connection.id}\nuserId = #{@userId}\n"
+      console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\n
+      connection.id=#{@connection.id}\nuserId = #{@userId}\n"
+
       bbbUserId = @userId
       dbid = Meteor.Users.findOne({'userId': bbbUserId, 'meetingId': meetingId})?._id
 
       #removeUserFromMeeting(meetingId, bbbUserId)
 
       setTimeout(Meteor.bindEnvironment(=>
-        console.log "will check if a user with bbb userid #{bbbUserId} is present(reconnected)"
+        console.log "will check if a user with bbb userid #{bbbUserId} 
+        is present(reconnected)"
+
         result = Meteor.Users.findOne({'userId': bbbUserId, 'meetingId': meetingId})?
         console.log "the result here is #{result}"
 
@@ -26,12 +30,17 @@ Meteor.publish 'users', (meetingId, userid) ->
         #   requestUserLeaving(meetingId, bbbUserId, dbid)
         )
       , 10000)
-
-
-
     )
   )
-  Meteor.Users.find({meetingId: meetingId}, {fields: { 'userId': 0, 'user.userid': 0, 'user.extern_userid': 0, 'user.voiceUser.userid': 0, 'user.voiceUser.web_userid': 0 }})
+  Meteor.Users.find(
+    {meetingId: meetingId},
+    {fields:{
+      'userId': 0,
+      'user.userid': 0,
+      'user.extern_userid': 0,
+      'user.voiceUser.userid': 0,
+      'user.voiceUser.web_userid': 0}
+    })
 
 Meteor.publish 'chat', (meetingId, userid) ->
   me = Meteor.Users.findOne({meetingId: meetingId, userId: userid})
