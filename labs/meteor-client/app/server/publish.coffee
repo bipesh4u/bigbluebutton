@@ -2,35 +2,27 @@
 # On the client side we pass the meetingId parameter
 Meteor.publish 'users', (meetingId, userid) ->
   console.log "publishing users, here the userid=#{userid}"
- 
-  #TODO check how this @ translates to jscript
 
   u = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})
   if u?
-    console.log "username of the subscriber: " + u.user?.name + ", status:" + u.user?.status
+    Meteor.Users.upsert({'meetingId':meetingId, 'userId': userid}, {$set:{'user.connection_status': "online"}})
+    console.log "username of the subscriber: " + u.user?.name + ", connection_status becomes online"
 
-  @_session.socket.on("close", Meteor.bindEnvironment(=>
+    @_session.socket.on("close", Meteor.bindEnvironment(=>
       console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\n
       connection.id=#{@connection.id}\nuserId = #{userid}\n"
 
-      dbid = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?._id
-
-      #removeUserFromMeeting(meetingId, userid)
+      Meteor.Users.upsert({'meetingId':meetingId, 'userId': userid}, {$set:{'user.connection_status': "offline"}})
+      console.log "username of the user losing connection: " + u.user?.name + ", connection_status: becomes offline"
 
       setTimeout(Meteor.bindEnvironment(=>
-        console.log "will check if a user with bbb userid #{userid} is present(reconnected)"
-
-        result = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?
+        console.log "will check if a user with bbb userid #{userid} is online(managed to reconnect)"
+        result = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?.user?.connection_status
         console.log "the result here is #{result}"
-
-        #console.log "connection here is:" + @_session.socket._session.connection
-        # unless result
-        #   # inform bbb-apps that the user has left
-        #   requestUserLeaving(meetingId, userid, dbid)
         )
       , 10000)
+      )
     )
-  )
   Meteor.Users.find(
     {meetingId: meetingId},
     {fields:{

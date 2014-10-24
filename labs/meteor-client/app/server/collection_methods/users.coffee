@@ -186,7 +186,7 @@ Meteor.methods
         permissions: user.permissions
         locked: user.locked
         time_of_joining: user.timeOfJoining
-        status: "offline" #TODO must change this so that Flash client users are not considered offline
+        #connection_status: "" #TODO must change this so that Flash client users are not considered offline
         voiceUser:
           web_userid: user.voiceUser.web_userid
           callernum: user.voiceUser.callernum
@@ -200,3 +200,4 @@ Meteor.methods
 
     id = Meteor.Users.insert(entry)
     console.log "added user id=[#{id}]:#{user.name}. Users.size is now #{Meteor.Users.find({meetingId: meetingId}).count()}"
+
