@@ -89,3 +89,4 @@ Template.shape.destroyed = ->
     wpm.clearShapes()
     displaySlide(wpm)
     manuallyDisplayShapes()
+
