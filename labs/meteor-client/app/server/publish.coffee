@@ -2,11 +2,14 @@
 # On the client side we pass the meetingId parameter
 Meteor.publish 'users', (meetingId, userid) ->
   console.log "publishing users, here the userid=#{userid}"
+  
+  #TODO check how this @ translates to jscript
+  #TODO do we need @userId or we can use userid???
 
-  console.log "before userId was:#{@userId}"
-  #@userId = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?._id
   @userId = userid
-  console.log "and now: #{@userId}"
+  u = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})
+  if u?
+    console.log "username of the subscriber: " + u.user?.name + ", status:" + u.user?.status
 
   @_session.socket.on("close", Meteor.bindEnvironment(=>
       console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\n

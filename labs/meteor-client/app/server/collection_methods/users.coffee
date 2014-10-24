@@ -186,7 +186,7 @@ Meteor.methods
         permissions: user.permissions
         locked: user.locked
         time_of_joining: user.timeOfJoining
-
+        status: "offline" #TODO must change this so that Flash client users are not considered offline
         voiceUser:
           web_userid: user.voiceUser.web_userid
           callernum: user.voiceUser.callernum
