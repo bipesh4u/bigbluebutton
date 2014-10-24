@@ -2,35 +2,31 @@
 # On the client side we pass the meetingId parameter
 Meteor.publish 'users', (meetingId, userid) ->
   console.log "publishing users, here the userid=#{userid}"
-  
+ 
   #TODO check how this @ translates to jscript
-  #TODO do we need @userId or we can use userid???
 
-  @userId = userid
   u = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})
   if u?
     console.log "username of the subscriber: " + u.user?.name + ", status:" + u.user?.status
 
   @_session.socket.on("close", Meteor.bindEnvironment(=>
       console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\n
-      connection.id=#{@connection.id}\nuserId = #{@userId}\n"
+      connection.id=#{@connection.id}\nuserId = #{userid}\n"
 
-      bbbUserId = @userId
-      dbid = Meteor.Users.findOne({'userId': bbbUserId, 'meetingId': meetingId})?._id
+      dbid = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?._id
 
-      #removeUserFromMeeting(meetingId, bbbUserId)
+      #removeUserFromMeeting(meetingId, userid)
 
       setTimeout(Meteor.bindEnvironment(=>
-        console.log "will check if a user with bbb userid #{bbbUserId} 
-        is present(reconnected)"
+        console.log "will check if a user with bbb userid #{userid} is present(reconnected)"
 
-        result = Meteor.Users.findOne({'userId': bbbUserId, 'meetingId': meetingId})?
+        result = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?
         console.log "the result here is #{result}"
 
         #console.log "connection here is:" + @_session.socket._session.connection
         # unless result
         #   # inform bbb-apps that the user has left
-        #   requestUserLeaving(meetingId, bbbUserId, dbid)
+        #   requestUserLeaving(meetingId, userid, dbid)
         )
       , 10000)
     )
