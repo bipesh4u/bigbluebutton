@@ -19,10 +19,19 @@ Meteor.publish 'users', (meetingId, userid) ->
         console.log "will check if a user with bbb userid #{userid} is online(managed to reconnect)"
         result = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?.user?.connection_status
         console.log "the result here is #{result}"
+        if result is "online"
+          console.log "user #{userid} (#{u.user.name}) managed to reconnect in meeting #{meetingId}"
+        else
+          console.log "user #{userid} (#{u.user.name}) failed to reconnect in meeting #{meetingId} and will be kicked out of the meeting"
+          requestUserLeaving(meetingId,  userid, u._id)
         )
       , 10000)
       )
     )
+  else
+    console.log "there is no such user..........."
+    return
+
   Meteor.Users.find(
     {meetingId: meetingId},
     {fields:{
