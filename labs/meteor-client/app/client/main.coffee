@@ -13,7 +13,7 @@ Template.header.events
   "click .chatBarIcon": (event) ->
     toggleChatbar()
   "click .videoFeedIcon": (event) ->
-    toggleCam @ 
+    toggleCam @
   "click .audioFeedIcon": (event) ->
     toggleVoiceCall @
   "click .muteIcon": (event) ->
@@ -68,9 +68,14 @@ Meteor.startup ->
 
   Meteor.autorun ->
     if Meteor.status().connected
-      console.log("connected")
+      console.log "connected" + JSON.stringify Meteor.status()
+      #Meteor.subscribe 'users', getInSession('meetingId'), getInSession("userId"), ->
+      #  console.log "done subscribing"
     else
-      console.log "disconnected"
+      if parseInt(Meteor.status().retryCount) > 3 #change this value
+        console.log "something else" + JSON.stringify Meteor.status()
+        console.log "time to go to :4000"
+        #window.location.href = Meteor.startingURL
 
   setInSession "display_usersList", true
   setInSession "display_navbar", true
@@ -83,3 +88,4 @@ Meteor.startup ->
   setInSession "dateOfBuild", Meteor.config?.dateOfBuild or "UNKNOWN DATE"
   setInSession "bbbServerVersion", Meteor.config?.bbbServerVersion or "UNKNOWN VERSION"
   setInSession "displayChatNotifications", true
+

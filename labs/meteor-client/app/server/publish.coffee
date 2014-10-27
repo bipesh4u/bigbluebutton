@@ -9,8 +9,8 @@ Meteor.publish 'users', (meetingId, userid) ->
     console.log "username of the subscriber: " + u.user?.name + ", connection_status becomes online"
 
     @_session.socket.on("close", Meteor.bindEnvironment(=>
-      console.log "\n\n\nCLOSEEEED\nsession.id=#{@_session.id}\n
-      connection.id=#{@connection.id}\nuserId = #{userid}\n"
+      console.log "\n\n\na user lost connection: session.id=#{@_session.id}
+       connection.id=#{@connection.id}\nuserId = #{userid}, username=#{u.user.name}, meeting=#{meetingId}"
 
       Meteor.Users.upsert({'meetingId':meetingId, 'userId': userid}, {$set:{'user.connection_status': "offline"}})
       console.log "username of the user losing connection: " + u.user?.name + ", connection_status: becomes offline"
@@ -29,8 +29,9 @@ Meteor.publish 'users', (meetingId, userid) ->
       )
     )
   else
-    console.log "there is no such user..........."
-    return
+    console.log "there is no such user....#{userid}......#{meetingId}."
+    Meteor.call "validateAuthToken", meetingId, userid, userid
+    #return #TODO check if we need a return here
 
   Meteor.Users.find(
     {meetingId: meetingId},
