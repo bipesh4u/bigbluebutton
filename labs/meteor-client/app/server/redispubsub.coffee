@@ -75,6 +75,11 @@ class Meteor.RedisPubSub
         updateVoiceUser meetingId, voiceUser
         return
 
+      # validate_auth_token_reply
+      if message.header.name is 'validate_auth_token_reply'
+        console.log "just received a validate_auth_token_reply for user " + message.payload.userid
+      return
+
       # listen only
       if message.header.name is 'user_listening_only'
         updateVoiceUser meetingId, {'web_userid': message.payload.userid, 'listenOnly': message.payload.listen_only}

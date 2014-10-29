@@ -159,7 +159,7 @@ Meteor.methods
   sendMeetingInfoToClient: (meetingId, userId) ->
     setInSession("userId", userId)
     setInSession("meetingId", meetingId)
-    setInSession("currentChatId", meetingId)
+    setInSession("currentChatId", meetingId) #TODO ??
     setInSession("meetingName", null)
     setInSession("userName", null)
 

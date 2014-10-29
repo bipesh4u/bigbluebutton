@@ -4,34 +4,37 @@ Meteor.publish 'users', (meetingId, userid) ->
   console.log "publishing users, here the userid=#{userid}"
 
   u = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})
+  username = u?.user?.name or "UNKNOWN"
   if u?
     Meteor.Users.upsert({'meetingId':meetingId, 'userId': userid}, {$set:{'user.connection_status': "online"}})
-    console.log "username of the subscriber: " + u.user?.name + ", connection_status becomes online"
+    console.log "username of the subscriber: " + username + ", connection_status becomes online"
 
     @_session.socket.on("close", Meteor.bindEnvironment(=>
-      console.log "\n\n\na user lost connection: session.id=#{@_session.id}
-       connection.id=#{@connection.id}\nuserId = #{userid}, username=#{u.user.name}, meeting=#{meetingId}"
+      console.log "\na user lost connection: session.id=#{@_session.id}
+       userId = #{userid}, username=#{username}, meeting=#{meetingId}"
 
+      #TODO this should happen only if there's such a user.
       Meteor.Users.upsert({'meetingId':meetingId, 'userId': userid}, {$set:{'user.connection_status': "offline"}})
-      console.log "username of the user losing connection: " + u.user?.name + ", connection_status: becomes offline"
+      console.log "username of the user losing connection: " + username + ", connection_status: becomes offline"
 
       setTimeout(Meteor.bindEnvironment(=>
         console.log "will check if a user with bbb userid #{userid} is online(managed to reconnect)"
         result = Meteor.Users.findOne({'userId': userid, 'meetingId': meetingId})?.user?.connection_status
         console.log "the result here is #{result}"
         if result is "online"
-          console.log "user #{userid} (#{u.user.name}) managed to reconnect in meeting #{meetingId}"
+          console.log "user #{userid} (#{username}) managed to reconnect in meeting #{meetingId}"
         else
-          console.log "user #{userid} (#{u.user.name}) failed to reconnect in meeting #{meetingId} and will be kicked out of the meeting"
-          requestUserLeaving(meetingId,  userid, u._id)
+          console.log "user #{userid} (#{username}) failed to reconnect in meeting #{meetingId} and will be kicked out of the meeting"
+          #requestUserLeaving(meetingId,  userid, u?._id)
+          Meteor.call "userLogout", meetingId, userid
         )
-      , 10000)
+      , 10000) #TODO pick this from config.coffee
       )
     )
   else
     console.log "there is no such user....#{userid}......#{meetingId}."
-    Meteor.call "validateAuthToken", meetingId, userid, userid
-    #return #TODO check if we need a return here
+    #Meteor.call "validateAuthToken", meetingId, userid, userid
+    #return
 
   Meteor.Users.find(
     {meetingId: meetingId},
