@@ -6,6 +6,10 @@
 # immediately, since they do not require permission for things such as muting themsevles. 
 # --------------------------------------------------------------------------------------------
 Meteor.methods
+  letMeKnowWhenThisUserIsAdded: (meetingId, userId, callback) ->
+    console.log "hh"
+    callback
+
   userShareAudio: (meetingId, userId, user_id) ->
     updateVoiceUser {'user_id': user_id, 'talking':false, 'joined': true, 'muted':false}
     #TODO we need to send a message to bbb-apps about it

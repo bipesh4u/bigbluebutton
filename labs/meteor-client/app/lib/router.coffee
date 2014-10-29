@@ -20,7 +20,7 @@
 
         if meetingId? and userId? and authToken?
           Meteor.call("validateAuthToken", meetingId, userId, authToken)
-          Meteor.call('sendMeetingInfoToClient', meetingId, userId)
+          #Meteor.call('sendMeetingInfoToClient', meetingId, userId)
           self.redirect('/')
         else
           console.log "unable to extract from the URL some of {meetingId, userId, authToken}"
@@ -30,10 +30,18 @@
     path: "/"
     onBeforeAction: ->
       self = @
-      console.log "in lib/router!!! " + getInSession('meetingId')+ " " +  getInSession("userId")
+      myId = getInSession("userId")
+      myMeetingId = getInSession('meetingId')
+      console.log "AA here the meetingId is: #{myMeetingId} |  the userid is:#{myId}"
+
+      Meteor.call "letMeKnowWhenThisUserIsAdded", myMeetingId, myId, ((err, res) ->
+        if err?
+          console.log "err=" + err
+        else
+          console.log "BB in router; letMeKnowWhenThisUserIsAdded just returned for user #{myId} with" + res)
+
       # Have to check on the server whether the credentials the user has are valid on db, without being able to spam requests for credentials
       Meteor.subscribe 'users', getInSession('meetingId'), getInSession("userId"), -> # callback for after users have been loaded on client
-        console.log "inlib/router 001"
         Meteor.subscribe 'chat', getInSession('meetingId'), getInSession("userId"), ->
           Meteor.subscribe 'shapes', getInSession('meetingId'), ->
             Meteor.subscribe 'slides', getInSession('meetingId'), ->
@@ -46,3 +54,4 @@
 
   @route "logout",
     path: "logout"
+
