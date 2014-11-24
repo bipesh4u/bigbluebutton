@@ -54,25 +54,27 @@
     
 </template>
 
+
 <template name="usernameEntry">
-	<span class="userNameContainer">
-		{{#if isCurrentUser userId}}
-			<p class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}} (you)">
-				<strong>{{user.name}} (you)</strong>
-			</p>
-		{{else}}
-			<p class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}}">
-				{{user.name}}
-			</p>
-		{{/if}}
-	</span>
+  <span class="userNameContainer">
+    {{#if isCurrentUser userId}}
+      <label class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}} (you)">
+        <strong>{{user.name}} (you)</strong>
+      </label>
+    {{else}}
+      <label class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}}">
+        {{user.name}}
+      </label>
+    {{/if}}
+  </span>
 </template>
 
+
 <template name="userItem">
-  <li>
+  <ul>
     {{> usernameEntry}} {{> displayUserIcons}}
-    
-  </li>
-    
-    
+  </ul>
 </template>
+
+
+
