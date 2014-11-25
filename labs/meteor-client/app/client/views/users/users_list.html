@@ -7,7 +7,9 @@
 				{{#contentFor region="scrollContents"}}
 					<ul class="usersList">
 						{{#each getUsersInMeeting}}
-							{{>userItem}}
+							<div id="content">
+								{{>userItem}}
+							</div>
 						{{/each}}
 					</ul>
 				{{/contentFor}}

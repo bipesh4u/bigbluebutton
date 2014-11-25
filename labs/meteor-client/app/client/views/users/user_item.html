@@ -71,7 +71,10 @@
 
 
 <template name="userItem">
-  <ul>
-    {{> usernameEntry}} {{> displayUserIcons}}
-  </ul>
+  <div id="username">
+    {{> usernameEntry}}
+  </div>
+  <div id="usericons">
+    {{> displayUserIcons}}
+  </div>
 </template>
