@@ -29,3 +29,6 @@
 .user-entry tr:hover {
   font-weight: bold;
 }
+.userListSettingIcon {
+  padding:5px;
+}
