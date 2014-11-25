@@ -58,13 +58,13 @@
 <template name="usernameEntry">
   <span class="userNameContainer">
     {{#if isCurrentUser userId}}
-      <label class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}} (you)">
-        <strong>{{user.name}} (you)</strong>
-      </label>
+      <span class="userCurrent userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}} (you)">
+        {{user.name}} (you)
+      </span>
     {{else}}
-      <label class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}}">
+      <span class="userNameEntry" rel="tooltip" data-placement="bottom" title="{{user.name}}">
         {{user.name}}
-      </label>
+      </span>
     {{/if}}
   </span>
 </template>
