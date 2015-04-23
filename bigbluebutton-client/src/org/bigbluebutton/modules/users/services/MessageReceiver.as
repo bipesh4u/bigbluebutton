@@ -263,7 +263,7 @@ package org.bigbluebutton.modules.users.services
     }
     
     private function handleVoiceUserTalking(msg:Object):void {
-      trace(LOG + "*** handleVoiceUserTalking " + msg.msg + " **** \n");      
+//      trace(LOG + "*** handleVoiceUserTalking " + msg.msg + " **** \n");      
       var map:Object = JSON.parse(msg.msg); 
       var userId:String = map.userId;
       var talking:Boolean = map.talking;  
