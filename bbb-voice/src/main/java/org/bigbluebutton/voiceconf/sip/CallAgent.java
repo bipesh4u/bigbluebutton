@@ -381,7 +381,10 @@ public class CallAgent extends CallListenerAdapter implements CallStreamObserver
                 log.error(e.getMessage());
                 log.error(StackTraceUtil.getStackTrace(e));
             }
+        } else {
+          log.debug("No SDP for [{}]", _destination);
         }
+       
        log.debug("Global stream creation falied for {}", _destination);
         return false;
     }
@@ -753,7 +756,7 @@ public class CallAgent extends CallListenerAdapter implements CallStreamObserver
 
     public void onCallStreamStarted() {
         log.info("Call stream has been started");
-        String videoStream = "screen" + _destination;//videoCallStream.getFreeswitchToBbbStreamName();
+        String videoStream = "screen" + _destination;
         notifyListenersOfOnCallStarted(videoStream);
     }
     
@@ -801,6 +804,7 @@ public class CallAgent extends CallListenerAdapter implements CallStreamObserver
     }
 
     public boolean startFreeswitchToBbbVideoStream() {
+      log.debug("in startFreeswitchToBbbVideoStream");
         return createVideoStream();
     }
 

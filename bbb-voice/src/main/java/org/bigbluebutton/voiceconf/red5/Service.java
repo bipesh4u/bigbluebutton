@@ -172,23 +172,35 @@ public class Service {
 		String peerId = "default";
 		String globalCall = "GLOBAL_AUDIO_" + voiceBridge;
 
-		if(!GlobalCall.existGlobalVideoStream(voiceBridge)) {
+//		if (!GlobalCall.existGlobalVideoStream(voiceBridge)) {
 
-			if(videoPresent) {
+			if (videoPresent) {
 				boolean success = false;
 				log.info("Create global video stream for {}", voiceBridge);
-				if (sipPeerManager != null) success = sipPeerManager.startFreeswitchToBbbVideoStream(peerId, globalCall);
-				if(success) {
+				if (sipPeerManager != null) {
+				  success = sipPeerManager.startFreeswitchToBbbVideoStream(peerId, globalCall);
+				}
+				
+				if (success) {
 					log.info("Global video stream creation succeded for [{}], [{}]", voiceBridge, GlobalCall.getGlobalVideoStream(voiceBridge));
 				} else {
 					log.warn("Global video stream creation failed for [{}]", voiceBridge);
 				}
+			} else {
+			  log.debug("Could not find video for [{}]", voiceBridge);
 			}
+//		} else {
+//		  log.debug("Video stream for [{}] does not exist.", voiceBridge);
+//		}
+		
+		if (sipPeerManager != null) {
+		  sipPeerManager.updateVideoStatus(peerId, globalCall, videoPresent);
 		}
-		if (sipPeerManager != null) sipPeerManager.updateVideoStatus(peerId, globalCall, videoPresent);
+		
 		GlobalCall.getGlobalVideoStream(voiceBridge);
 		VideoTranscoder transcoder = GlobalCall.getGlobalVideoStream(voiceBridge);
-		if(transcoder != null) {
+		
+		if (transcoder != null) {
 			log.debug("Video {} present", GlobalCall.getGlobalVideoStream(voiceBridge).getStreamName());
 			transcoder.setVideoPresent(videoPresent);
 		} else {

@@ -129,6 +129,7 @@ public final class SipPeerManager {
     public boolean startFreeswitchToBbbVideoStream(String peerId, String userId) {
         SipPeer sipUser = sipPeers.get(peerId);
         if(sipUser != null) {
+          log.debug("startFreeswitchToBbbVideoStream userid=[{}]", userId);
             return sipUser.startFreeswitchToBbbVideoStream(userId);
         } else
             log.debug("sipUser for {} is null", peerId);

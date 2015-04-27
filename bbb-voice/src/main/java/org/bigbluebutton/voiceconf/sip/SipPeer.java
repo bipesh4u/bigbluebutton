@@ -289,6 +289,7 @@ public class SipPeer implements SipRegisterAgentListener {
     public boolean startFreeswitchToBbbVideoStream(String userId){
         CallAgent ca = callManager.get(userId);
         if(ca != null) {
+          log.debug("Starting startFreeswitchToBbbVideoStream");
             return ca.startFreeswitchToBbbVideoStream();
         } else {
             log.debug("callAgent for {} is null", userId);
