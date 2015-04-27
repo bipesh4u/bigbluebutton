@@ -30,13 +30,13 @@ package org.bigbluebutton.core.services
        var vu: VoiceUserVO = msgProc.processUserJoinedVoiceMessage(user);
        
        if (vu != null) {
-         trace(LOG + "*** got voice user joined. name=[" + vu.name + "] **** \n");
+//         trace(LOG + "*** got voice user joined. name=[" + vu.name + "] **** \n");
          var u: UserVO = UsersModel.getInstance().userJoinedVoice(vu);
          if (u != null) {
            // dispatch event
          }
        } else {
-         trace(LOG + "*** failed to get voice user name=[" + vu.name + "] **** \n");
+//         trace(LOG + "*** failed to get voice user name=[" + vu.name + "] **** \n");
        }      
     }
     
@@ -100,7 +100,7 @@ package org.bigbluebutton.core.services
       var vu: Object = msgProc.processUserTalkingMessage(msg);
       
       if (vu != null) {
-        trace(LOG + "*** got user name=[" + vu.userId + "] **** \n");
+//        trace(LOG + "*** got user name=[" + vu.userId + "] **** \n");
         var u: UserVO = UsersModel.getInstance().userTalking(vu.userId, vu.voiceId, vu.talking);
         if (u != null) {
           // dispatch event

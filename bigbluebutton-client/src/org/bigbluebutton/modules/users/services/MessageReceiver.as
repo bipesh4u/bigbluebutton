@@ -250,7 +250,7 @@ package org.bigbluebutton.modules.users.services
     }
 
     private function userTalk(userId:String, talking:Boolean):void {      
-      trace("User talking event");
+//      trace(LOG + "User talking event");
       var l:BBBUser = _conference.getUser(userId);			
       if (l != null) {
         l.talking = talking;

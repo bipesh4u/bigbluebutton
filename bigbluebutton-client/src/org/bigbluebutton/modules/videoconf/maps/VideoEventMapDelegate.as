@@ -65,6 +65,8 @@ package org.bigbluebutton.modules.videoconf.maps
 
   public class VideoEventMapDelegate
   {
+    private static const LOG:String = "Video::VideoEventMapDelegate - ";
+    
     static private var PERMISSION_DENIED_ERROR:String = "PermissionDeniedError";
 
     private var options:VideoConfOptions = new VideoConfOptions();
@@ -97,23 +99,23 @@ package org.bigbluebutton.modules.videoconf.maps
     }
     
     public function start(uri:String):void {
-      trace("VideoEventMapDelegate:: [" + me + "] Video Module Started.");
+      trace(LOG + "start - [" + me + "] Video Module Started.");
       this.uri = uri;
-	  this.uri = "rtmp://10.0.3.97/video";
+//	    this.uri = "rtmp://10.0.3.97/video";
     }
         
     public function viewCamera(userID:String, stream:String, name:String, mock:Boolean = false):void {
-      trace("VideoEventMapDelegate:: [" + me + "] viewCamera. ready = [" + _ready + "]");
+      trace(" [" + me + "] viewCamera. ready = [" + _ready + "]");
       
       if (!_ready) return;
-      trace("VideoEventMapDelegate:: [" + me + "] Viewing [" + userID + " stream [" + stream + "]");
+      trace(LOG + "viewCamera [" + me + "] Viewing [" + userID + " stream [" + stream + "]");
       if (! UserManager.getInstance().getConference().amIThisUser(userID)) {
         openViewWindowFor(userID);			
       }      
     }
 
     public function handleUserLeftEvent(event:UserLeftEvent):void {
-      trace("VideoEventMapDelegate:: [" + me + "] handleUserLeftEvent. ready = [" + _ready + "]");
+      trace(LOG + "handleUserLeftEvent [" + me + "] handleUserLeftEvent. ready = [" + _ready + "]");
       
       if (!_ready) return;
       
@@ -207,7 +209,7 @@ package org.bigbluebutton.modules.videoconf.maps
     }
     
     private function openWebcamWindows():void {
-      trace("VideoEventMapDelegate:: [" + me + "] openWebcamWindows:: ready = [" + _ready + "]");
+      trace(LOG + "openWebcamWindows [" + me + "] ready = [" + _ready + "]");
       
       var uids:ArrayCollection = UsersUtil.getUserIDs();
       
@@ -344,6 +346,7 @@ package org.bigbluebutton.modules.videoconf.maps
         fsWindow.videoOptions = options;       
         fsWindow.resolutions = "640x480".split(",");
 
+        trace(LOG + "openFreeswitchVideo - streamId=[" + streamName + "]");
         fsWindow.startVideo(proxy.connection, streamName);
         webcamWindows.addWindow(fsWindow);
         openWindow(fsWindow);

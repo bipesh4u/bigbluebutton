@@ -107,7 +107,7 @@ package org.bigbluebutton.main.model.users
     }   
         
     public function onMessageFromServer(messageName:String, msg:Object):void {
-      trace(LOG + "Got message from server [" + messageName + "]"); 
+//      trace(LOG + "Got message from server [" + messageName + "]"); 
       if (!authenticated && (messageName == "validateAuthTokenReply")) {
         handleValidateAuthTokenReply(msg)
       } else if (messageName == "validateAuthTokenTimedOut") {
