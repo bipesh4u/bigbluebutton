@@ -126,6 +126,15 @@ public final class SipPeerManager {
         }else throw new PeerNotFoundException("Can't find sip peer " + peerId);
     }
 
+    public boolean startFreeswitchToBbbVideoStream(String peerId, String userId) {
+        SipPeer sipUser = sipPeers.get(peerId);
+        if(sipUser != null) {
+            return sipUser.startFreeswitchToBbbVideoStream(userId);
+        } else
+            log.debug("sipUser for {} is null", peerId);
+        return false;
+    }
+
     public String getStreamType(String peerId, String clientId, String streamName) {
         SipPeer sipUser = sipPeers.get(peerId);
         if (sipUser != null) {
@@ -213,4 +222,12 @@ public final class SipPeerManager {
 	public void setMessagingService(IMessagingService service) {
 		messagingService = service;
 	}
+
+    public void updateVideoStatus(String peerId, String userId, boolean present) {
+        SipPeer sipUser = sipPeers.get(peerId);
+        if(sipUser != null) {
+            sipUser.updateVideoStatus(userId, present);
+        } else
+            log.debug("sipUser for {} is null", peerId);
+    }
 }

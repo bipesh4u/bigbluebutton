@@ -407,7 +407,7 @@ trait UsersApp {
       outGW.send(new UserVoiceTalking(meetingID, recorded, voiceBridge, nu))        
     }     
   }
-  
+
   def handleAssignPresenter(msg: AssignPresenter):Unit = {
 	assignNewPresenter(msg.newPresenterID, msg.newPresenterName, msg.assignedBy)
   } 
