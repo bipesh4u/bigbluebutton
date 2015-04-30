@@ -21,7 +21,7 @@ inviteSubmit = function() {
   ua.start();
 
   // Send invite
-  var session = ua.invite(uri, {
+  mySession = ua.invite(uri, {
       media: {
 //          stream: new webkitMediaStream(),
           render: {
@@ -37,4 +37,8 @@ inviteSubmit = function() {
           }
       }
   });
+}
+
+stopSubmit = function() {
+  mySession.bye();
 }

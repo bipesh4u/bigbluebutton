@@ -253,9 +253,20 @@ Handlebars.registerHelper "playingVideo", () ->
   setTimeout(redrawWhiteboard, 0)
 
 @toggleVoiceCall = (event) ->
-   inviteSubmit()
-   setInSession('playingVideo', true)
-   return true
+
+  if getInSession('playingVideo')
+    stopSubmit()
+    setInSession('playingVideo', false)
+    $('#video-window').css('display', 'none')
+    return false
+  else
+    inviteSubmit()
+    setInSession('playingVideo', true)
+    $('#video-window').css('display', '')
+    return true
+
+
+
 #  if BBB.amISharingAudio()
 #    hangupCallback = ->
 #      console.log "left voice conference"
