@@ -1,15 +1,18 @@
 <template name="whiteboard">
     <div id="{{id}}" {{visibility name}} class="component gradientBar">
-        <h3 id="whiteboard-navbar" class="title">
-            <span class="glyphicon glyphicon-pencil"></span>
-            {{title}}
-        </h3>
-        {{#each getCurrentSlide}}
-            {{> slide}}
-        {{/each}}
-        <div id="whiteboard-container">
-            <div id="whiteboard-paper">
+        {{#unless playingVideo}}
+            <h3 id="whiteboard-navbar" class="title">
+                <span class="glyphicon glyphicon-pencil"></span>
+                {{title}}
+            </h3>
+            {{#each getCurrentSlide}}
+                {{> slide}}
+            {{/each}}
+            <div id="whiteboard-container">
+                <div id="whiteboard-paper">
+                </div>
             </div>
-        </div>
+        {{/unless}}
+        <video id="video-window" autoplay="autoplay" title="Speaker" style="width:100%;"></video>
     </div>
 </template>

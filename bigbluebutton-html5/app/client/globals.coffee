@@ -171,6 +171,11 @@ Handlebars.registerHelper "visibility", (section) ->
   else
     style: 'display:none;'
 
+Handlebars.registerHelper "playingVideo", () ->
+  result = getInSession('playingVideo') or false
+
+  return result
+
 # transform plain text links into HTML tags compatible with Flash client
 @linkify = (str) ->
   www = /(^|[^\/])(www\.[\S]+($|\b))/img
@@ -249,6 +254,7 @@ Handlebars.registerHelper "visibility", (section) ->
 
 @toggleVoiceCall = (event) ->
    inviteSubmit()
+   setInSession('playingVideo', true)
    return true
 #  if BBB.amISharingAudio()
 #    hangupCallback = ->
@@ -338,6 +344,7 @@ Handlebars.registerHelper "visibility", (section) ->
     setInSession "messageFontSize", Meteor.config.app.mobileFont
   else
     setInSession "messageFontSize", Meteor.config.app.desktopFont
+  setInSession 'playingVideo', false
   setInSession 'display_slidingMenu', false
   setInSession 'display_hiddenNavbarSection', false
 
