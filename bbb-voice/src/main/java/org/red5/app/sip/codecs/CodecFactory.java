@@ -23,6 +23,7 @@ public class CodecFactory {
     private static final int videoCodecH264 = H264Codec.codecId;
     private static final int videoCodecVP8 = VP8Codec.codecId;
     private int[] availableVideoCodecsId = {videoCodecVP8};
+//    private int[] availableVideoCodecsId = {videoCodecH264};
 
 
     private static CodecFactory singletonSIPCodecFactory = new CodecFactory(); 
