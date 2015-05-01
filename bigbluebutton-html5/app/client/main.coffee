@@ -98,7 +98,7 @@ loadLib = (libname) ->
 # These settings can just be stored locally in session, created at start up
 Meteor.startup ->
   # Load SIP libraries before the application starts
-  loadLib('sip.js')
+  # loadLib('sip.js')
   loadLib('bbb_webrtc_bridge_sip.js')
 
   @SessionAmplify = _.extend({}, Session,
@@ -121,7 +121,8 @@ Template.footer.helpers
 
 Template.header.events
   "click .joinAudioButton": (event) ->
-    onAudioJoinHelper()
+    #onAudioJoinHelper()
+    toggleVoiceCall()
 
   "click .chatBarIcon": (event) ->
     $(".tooltip").hide()
@@ -143,7 +144,8 @@ Template.header.events
     toggleNavbar()
 
   "click .leaveAudioButton": (event) ->
-    exitVoiceCall event
+    # exitVoiceCall event
+    toggleVoiceCall()
 
   "click .lowerHand": (event) ->
     $(".tooltip").hide()
@@ -194,7 +196,8 @@ Template.header.events
 
 Template.slidingMenu.events
   'click .joinAudioButton': (event) ->
-    onAudioJoinHelper()
+    # onAudioJoinHelper()
+    toggleVoiceCall()
 
   'click .chatBarIcon': (event) ->
     $('.tooltip').hide()
@@ -228,7 +231,8 @@ Template.slidingMenu.events
     $('.collapseButton').blur()
 
   "click .leaveAudioButton": (event) ->
-    exitVoiceCall event
+    # exitVoiceCall event
+    toggleVoiceCall()
     toggleSlidingMenu()
 
 Template.main.helpers
