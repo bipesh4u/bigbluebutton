@@ -361,7 +361,9 @@ public class CallAgent extends CallListenerAdapter implements CallStreamObserver
                     videoReceiver.setOutput(output);
                     videoReceiver.setFormat("flv");
                     videoReceiver.setLoglevel("warning");
-                    videoReceiver.addCustomParameter("-q:v", "1");
+                    videoReceiver.addCustomParameter("-c:v", "libx264");
+                    videoReceiver.addCustomParameter("-preset", "veryfast");
+                    videoReceiver.addCustomParameter("-b:v", "5M");
 
                     log.debug("Starting process now...");
 
