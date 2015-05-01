@@ -172,7 +172,7 @@ public class Service {
 		String peerId = "default";
 		String globalCall = "GLOBAL_AUDIO_" + voiceBridge;
 
-//		if (!GlobalCall.existGlobalVideoStream(voiceBridge)) {
+		if (!GlobalCall.existGlobalVideoStream(voiceBridge)) {
 
 			if (videoPresent) {
 				boolean success = false;
@@ -189,9 +189,9 @@ public class Service {
 			} else {
 			  log.debug("Could not find video for [{}]", voiceBridge);
 			}
-//		} else {
-//		  log.debug("Video stream for [{}] does not exist.", voiceBridge);
-//		}
+		} else {
+		  log.debug("Video stream for [{}] does not exist.", voiceBridge);
+		}
 		
 		if (sipPeerManager != null) {
 		  sipPeerManager.updateVideoStatus(peerId, globalCall, videoPresent);
