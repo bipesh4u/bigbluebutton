@@ -1,9 +1,9 @@
 @import "variables";
 
 .active {
-  border: .2vh solid extract(@azure, 2) !important;
+  border: .2vh solid !important;
   @media @mobile-portrait-with-keyboard, @mobile-portrait {
-    border-left: .1vh solid extract(@azure, 2) !important;
+    border-left: .1vh solid !important;
   }
 }
 
@@ -76,6 +76,18 @@
 .chatNameSelectorPrivate {
   .chatNameSelector;
   width:90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @media @landscape {
+    height: 20px;
+  }
+  @media @desktop-portrait {
+    height: 25px;
+  }
+  @media @mobile-portrait, @mobile-portrait-with-keyboard {
+    font-size: 4vw;
+  }
 }
 
 .chatNameSelectorPublic {
@@ -107,18 +119,36 @@
   padding: 5px;
 }
 
+
+.disabledChat {
+  background-color: grey;
+  width: 100% !important;
+}
+
 .dropdown {
   float: left;
   @media @desktop-portrait, @mobile-portrait, @mobile-portrait-with-keyboard {
     .dropdownMessage {
-      font-size: 3vw;
-      font-style: italic;
+      font-size: 3vw; //might be obsolete
+      font-style: italic; //might be obsolete
     }
   }
   .dropdown-menu {
     height: 80px;
     overflow-y: scroll;
     right: 0px;
+  }
+}
+
+#fontSizeTable {
+  /* Static font sizes are used everywhere in this control. This is the maximum amount of space required */
+  height: 64px;
+  #displayButtons {
+    text-align:center;
+    width:84px;
+  }
+  #displayLabel {
+    width: 154px;
   }
 }
 
@@ -145,8 +175,9 @@
   padding:5px;
   border-radius:4px;
   border:1px solid extract(@lightGrey, 3);
-  @media @landscape, @desktop-portrait {
-    height: 15%;
+
+  @media @landscape {
+    height: 40px; /* same height as send button */
   }
   @media @mobile-portrait {
     font-size: 4vw;
@@ -158,6 +189,7 @@
   }
   @media @desktop-portrait {
     font-size: 25px;
+    height: 60px; /* same height as send button */
   }
 }
 
@@ -167,10 +199,8 @@
   padding-left: 15px;
   padding-top: 15px;
   p {
-    @media @mobile-portrait, 
-    @mobile-portrait-with-keyboard
-    {
-      font-size: 3vw;
+    @media @mobile-portrait, @mobile-portrait-with-keyboard {
+      font-size: 6vw;
       font-style: italic;
     }
   }
@@ -185,38 +215,23 @@
 
 .private-chat-user-box {
   border-left: 1px solid grey;
-  height: 300px;
+  min-width: 50%;
+  height: 40px;
   padding: 5px;
-  width: 90%;
-}
-
-.private-chat-user-list {
-  font-size: 12px;
-  height: 100%;
-  overflow-y: scroll;
-  overflow-x: scroll;
-  :hover {
-    background: extract(@azure, 2);
-    font-size: 14px;
-    font-style: italic;
-  }
-
-  .private-chat-user-entry
-  {
-     @media @mobile-portrait-with-keyboard, @mobile-portrait
-     {
-       height: 5vw;
-       font-size: 4vw;
-     }
+  @media @mobile-portrait-with-keyboard, @mobile-portrait {
+    width: 60%;
+    height: 100px;
+    font-size: 40px;
+    padding-left: 25px;
   }
 }
 
 #sendMessageButton {
   background-color: extract(@azure, 1);
-  width: 20%;
+  width: 20%; /* 75% for the message input, 5% margin between the two */
   color: extract(@white, 1);
   @media @desktop-portrait {
-    width: 100px;
+    width: 20%; /* 75% for the message input, 5% margin between the two */
     font-size: 30px;
     height: 60px;
     margin-left: 5%;
@@ -252,8 +267,7 @@
   width: 100%;
   a {
     padding:0px;
-    @media @mobile-portrait-with-keyboard,
-    @mobile-portrait {
+    @media @mobile-portrait-with-keyboard, @mobile-portrait {
       font-size: 35px;
     }
     @media @desktop-portrait {
@@ -273,12 +287,12 @@
 
 .tab {
   font-size: 14px;
-  height:auto !important;
+  height:auto;
   width: 25% !important;
 
   &:hover {
     background-color: #ddd;
-    border: 1px solid extract(@azure, 2);
+    border: 1px solid;
     border-bottom: none;
   }
 }

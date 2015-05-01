@@ -61,6 +61,14 @@
   currentPresentation = Meteor.Presentations.findOne({"presentation.current": true})
   currentPresentation?.presentation?.name
 
+# helper to determine whether user has joined any type of audio
+Handlebars.registerHelper "amIInAudio", ->
+  BBB.amIInAudio()
+
+# helper to determine whether the user is in the listen only audio stream
+Handlebars.registerHelper "amIListenOnlyAudio", ->
+  BBB.amIListenOnlyAudio()
+
 Handlebars.registerHelper "colourToHex", (value) =>
   @window.colourToHex(value)
 
@@ -104,7 +112,7 @@ Handlebars.registerHelper "getUsersInMeeting", ->
   raised.concat lowered
 
 Handlebars.registerHelper "getWhiteboardTitle", ->
-  "Presentation: " + (getPresentationFilename() or "Loading...")
+  (getPresentationFilename() or "Loading presentaion...")
 
 Handlebars.registerHelper "isCurrentUser", (userId) ->
   userId is null or userId is BBB.getCurrentUser()?.userId
@@ -116,9 +124,6 @@ Handlebars.registerHelper "isCurrentUserRaisingHand", ->
   user = BBB.getCurrentUser()
   user?.user?.raise_hand
 
-Handlebars.registerHelper "isCurrentUserSharingAudio", ->
-  BBB.amISharingAudio()
-
 Handlebars.registerHelper "isCurrentUserSharingVideo", ->
   BBB.amISharingVideo()
 
@@ -128,15 +133,14 @@ Handlebars.registerHelper "isCurrentUserTalking", ->
 Handlebars.registerHelper "isDisconnected", ->
   return !Meteor.status().connected
 
-Handlebars.registerHelper "isUserListenOnly", (userId) ->
-  user = Meteor.Users.findOne({userId:userId})
-  return user?.user?.listenOnly
+Handlebars.registerHelper "isUserInAudio", (userId) ->
+  BBB.isUserInAudio(userId)
+
+Handlebars.registerHelper "isUserListenOnlyAudio", (userId) ->
+  BBB.isUserListenOnlyAudio(userId)
 
 Handlebars.registerHelper "isUserMuted", (userId) ->
   BBB.isUserMuted(userId)
-
-Handlebars.registerHelper "isUserSharingAudio", (userId) ->
-  BBB.isUserSharingAudio(userId)
 
 Handlebars.registerHelper "isUserSharingVideo", (userId) ->
   BBB.isUserSharingWebcam(userId)
@@ -144,8 +148,14 @@ Handlebars.registerHelper "isUserSharingVideo", (userId) ->
 Handlebars.registerHelper "isUserTalking", (userId) ->
   BBB.isUserTalking(userId)
 
+Handlebars.registerHelper 'isMobile', () ->
+  isMobile()
+
 Handlebars.registerHelper 'isPortraitMobile', () ->
-  window.matchMedia('(orientation: portrait)').matches and window.matchMedia('(max-device-aspect-ratio: 1/1)').matches
+  isPortraitMobile()
+
+Handlebars.registerHelper 'isMobileChromeOrFirefox', () ->
+  isMobile() and ((getBrowserName() is 'Chrome') or (getBrowserName() is 'Firefox'))
 
 Handlebars.registerHelper "meetingIsRecording", ->
   Meteor.Meetings.findOne()?.recorded # Should only ever have one meeting, so we dont need any filter and can trust result #1
@@ -182,6 +192,11 @@ Handlebars.registerHelper "playingVideo", () ->
   http = /\b(https?:\/\/[0-9a-z+|.,:;\/&?_~%#=@!-]*[0-9a-z+|\/&_~%#=@-])/img
   str = str.replace http, "<a href='event:$1'><u>$1</u></a>"
   str = str.replace www, "$1<a href='event:http://$2'><u>$2</u></a>"
+
+@introToAudio = (event, {isListenOnly} = {}) ->
+  isListenOnly ?= true
+  joinVoiceCall event, isListenOnly: isListenOnly
+  displayWebRTCNotification()
 
 # check the chat history of the user and add tabs for the private chats
 @populateChatTabs = (msg) ->
@@ -278,6 +293,49 @@ Handlebars.registerHelper "playingVideo", () ->
 #    BBB.joinVoiceConference joinCallback # make the call #TODO should we apply role permissions to this action?
 #  return false
 
+###
+# Periodically check the status of the WebRTC call, when a call has been established attempt to hangup,
+# retry if a call is in progress, send the leave voice conference message to BBB
+@exitVoiceCall = (event) ->
+  # To be called when the hangup is initiated
+  hangupCallback = ->
+    console.log "Exiting Voice Conference"
+
+  # Checks periodically until a call is established so we can successfully end the call
+  # clean state
+  getInSession("triedHangup", false)
+  # function to initiate call
+  (checkToHangupCall = (context) ->
+    # if an attempt to hang up the call is made when the current session is not yet finished, the request has no effect
+    # keep track in the session if we haven't tried a hangup
+    if BBB.getCallStatus() isnt null and !getInSession("triedHangup")
+      console.log "Attempting to hangup on WebRTC call"
+      if BBB.amIListenOnlyAudio() # notify BBB-apps we are leaving the call call if we are listen only
+        Meteor.call('listenOnlyRequestToggle', getInSession("meetingId"), getInSession("userId"), getInSession("authToken"), false)
+      BBB.leaveVoiceConference hangupCallback
+      getInSession("triedHangup", true) # we have hung up, prevent retries
+    else
+      console.log "RETRYING hangup on WebRTC call in #{Meteor.config.app.WebRTCHangupRetryInterval} ms"
+      setTimeout checkToHangupCall, Meteor.config.app.WebRTCHangupRetryInterval # try again periodically
+  )(@) # automatically run function
+  return false
+
+# close the daudio UI, then join the conference. If listen only send the request to the server
+@joinVoiceCall = (event, {isListenOnly} = {}) ->
+  $('#joinAudioDialog').dialog('close')
+  isListenOnly ?= true
+
+  # create voice call params
+  joinCallback = (message) ->
+    console.log "Beginning WebRTC Conference Call"
+
+  if isListenOnly
+    Meteor.call('listenOnlyRequestToggle', getInSession("meetingId"), getInSession("userId"), getInSession("authToken"), true)
+  BBB.joinVoiceConference joinCallback, isListenOnly # make the call #TODO should we apply role permissions to this action?
+
+  return false
+###
+
 @toggleWhiteBoard = ->
   if getInSession("display_whiteboard") and isOnlyOnePanelOpen()
     setInSession "display_usersList", true
@@ -293,14 +351,11 @@ Handlebars.registerHelper "playingVideo", () ->
     setInSession 'display_slidingMenu', false
     $('#sliding-menu').removeClass('sliding-menu-opened')
     $('#shield').css('display', 'none')
-    $(document).unbind('scroll')
   else
     CreateFixedView()
     setInSession 'display_slidingMenu', true
     $('#sliding-menu').addClass('sliding-menu-opened')
     $('#shield').css('display', 'block')
-    $(document).bind 'scroll', () ->
-      window.scrollTo(0, 0)
 
 @toggleNavbarCollapse = ->
   setInSession 'display_hiddenNavbarSection', !getInSession 'display_hiddenNavbarSection'
@@ -316,8 +371,8 @@ Handlebars.registerHelper "playingVideo", () ->
 # the user's userId
 @userLogout = (meeting, user) ->
   Meteor.call("userLogout", meeting, user, getInSession("authToken"))
-  console.log "logging out #{Meteor.config.app.logOutUrl}"
-  clearSessionVar(document.location = Meteor.config.app.logOutUrl) # navigate to logout
+  console.log "logging out"
+  clearSessionVar(document.location = getInSession 'logoutURL') # navigate to logout
 
 # Clear the local user session
 @clearSessionVar = (callback) ->
@@ -331,6 +386,7 @@ Handlebars.registerHelper "playingVideo", () ->
   amplify.store('display_usersList', null)
   amplify.store('display_whiteboard', null)
   amplify.store('inChatWith', null)
+  amplify.store('logoutURL', null)
   amplify.store('meetingId', null)
   amplify.store('messageFontSize', null)
   amplify.store('tabsRenderedTime', null)
@@ -351,14 +407,14 @@ Handlebars.registerHelper "playingVideo", () ->
   setInSession "display_whiteboard", true
   setInSession "display_chatPane", true
   setInSession "inChatWith", 'PUBLIC_CHAT'
-  if isPortraitMobile()
+  if isPortraitMobile() or isLandscapeMobile()
     setInSession "messageFontSize", Meteor.config.app.mobileFont
   else
     setInSession "messageFontSize", Meteor.config.app.desktopFont
   setInSession 'playingVideo', false
   setInSession 'display_slidingMenu', false
   setInSession 'display_hiddenNavbarSection', false
-
+  setInSession 'webrtc_notification_is_displayed', false
 
 @onLoadComplete = ->
   setDefaultSettings()
@@ -366,7 +422,7 @@ Handlebars.registerHelper "playingVideo", () ->
   Meteor.Users.find().observe({
   removed: (oldDocument) ->
     if oldDocument.userId is getInSession 'userId'
-      document.location = Meteor.config.app.logOutUrl
+      document.location = getInSession 'logoutURL'
   })
 
 # applies zooming to the stroke thickness
@@ -375,49 +431,29 @@ Handlebars.registerHelper "playingVideo", () ->
   ratio = (currentSlide?.slide.width_ratio + currentSlide?.slide.height_ratio) / 2
   thickness * 100 / ratio
 
-# TODO TEMPORARY!!
-# must not have this in production
-@whoami = ->
-  console.log JSON.stringify
-    username: getInSession "userName"
-    userid: getInSession "userId"
-    authToken: getInSession "authToken"
-
-@listSessionVars = ->
-  console.log SessionAmplify.keys
-
 # Detects a mobile device
 @isMobile = ->
   navigator.userAgent.match(/Android/i) or
-  navigator.userAgent.match(/iPad/i) or
-  navigator.userAgent.match(/iPhone/i) or
-  navigator.userAgent.match(/iPod/i) or
+  navigator.userAgent.match(/iPhone|iPad|iPod/i) or
+  navigator.userAgent.match(/BlackBerry/i) or
   navigator.userAgent.match(/Windows Phone/i) or
+  navigator.userAgent.match(/IEMobile/i) or
   navigator.userAgent.match(/BlackBerry/i) or
   navigator.userAgent.match(/webOS/i)
 
 # Checks if the view is portrait and a mobile device is being used
 @isPortraitMobile = () ->
+ isMobile() and
  window.matchMedia('(orientation: portrait)').matches and        # browser is portrait
- window.matchMedia('(max-device-aspect-ratio: 1/1)').matches and # device is portrait
- (navigator.userAgent.match(/Android/i) or                       # device is one of the following mobile devices:
- navigator.userAgent.match(/iPhone|iPad|iPod/i) or  
- navigator.userAgent.match(/BlackBerry/i) or
- navigator.userAgent.match(/Opera Mini/i) or
- navigator.userAgent.match(/IEMobile/i) or
- navigator.userAgent.match(/webOS/i))
+ window.matchMedia('(max-device-aspect-ratio: 1/1)').matches     # device is portrait
+
 
 # Checks if the view is landscape and mobile device is being used
 @isLandscapeMobile = () ->
-  window.matchMedia('(orientation: landscape)').matches and # browser is landscape
-  window.matchMedia('(min-device-aspect-ratio: 1/1)').matches and # device is landscape
-  (navigator.userAgent.match(/Android/i) or # device is one of the mobile gadgets
-  navigator.userAgent.match(/iPad/i) or
-  navigator.userAgent.match(/iPhone/i) or
-  navigator.userAgent.match(/iPod/i) or
-  navigator.userAgent.match(/Windows Phone/i) or
-  navigator.userAgent.match(/BlackBerry/i) or
-  navigator.userAgent.match(/webOS/i))
+  isMobile() and
+  window.matchMedia('(orientation: landscape)').matches and     # browser is landscape
+  window.matchMedia('(min-device-aspect-ratio: 1/1)').matches   # device is landscape
+
 
 # Checks if only one panel (userlist/whiteboard/chatbar) is currently open
 @isOnlyOnePanelOpen = () ->
@@ -525,3 +561,16 @@ Handlebars.registerHelper "playingVideo", () ->
   $('#main').css('position', 'fixed')
   $('#main').css('top', '50px')
   $('#main').css('left', '15%')
+
+# determines which browser is being used
+@getBrowserName = () ->
+  if navigator.userAgent.match(/Chrome/i)
+    return 'Chrome'
+  else if navigator.userAgent.match(/Firefox/i)
+    return 'Firefox'
+  else if navigator.userAgent.match(/Safari/i)
+    return 'Safari'
+  else if navigator.userAgent.match(/Trident/i)
+    return 'IE'
+  else
+    return null
