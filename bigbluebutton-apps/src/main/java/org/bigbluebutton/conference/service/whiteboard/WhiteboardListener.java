@@ -1,6 +1,4 @@
-
 package org.bigbluebutton.conference.service.whiteboard;
-
 
 import org.bigbluebutton.conference.service.messaging.MessagingConstants;
 import org.bigbluebutton.conference.service.messaging.redis.MessageHandler;
