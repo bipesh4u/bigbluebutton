@@ -2,10 +2,14 @@ package org.bigbluebutton.red5.pubsub.messages;
 
 import java.util.HashMap;
 
+import org.bigbluebutton.red5.pub.messages.Constants;
+import org.bigbluebutton.red5.pub.messages.MessageBuilder;
+import org.bigbluebutton.red5.sub.messages.ISubscribedMessage;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class UndoWhiteboardReplyMessage implements IMessage {
+public class UndoWhiteboardReplyMessage implements ISubscribedMessage {
 
 	// the name of this event should be undo_whiteboard_reply (as it corresponds
 	// to undo_whiteboard_request which entered bbb-apps)

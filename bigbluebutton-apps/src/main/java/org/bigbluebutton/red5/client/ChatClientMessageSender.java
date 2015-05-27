@@ -6,9 +6,9 @@ import java.util.Map;
 import org.bigbluebutton.conference.meeting.messaging.red5.BroadcastClientMessage;
 import org.bigbluebutton.conference.meeting.messaging.red5.ConnectionInvokerService;
 import org.bigbluebutton.conference.service.chat.ChatKeyUtil;
-import org.bigbluebutton.red5.pubsub.messages.GetChatHistoryReplyMessage;
-import org.bigbluebutton.red5.pubsub.messages.SendPrivateChatMessage;
-import org.bigbluebutton.red5.pubsub.messages.SendPublicChatMessage;
+import org.bigbluebutton.red5.pub.messages.SendPrivateChatMessage;
+import org.bigbluebutton.red5.pub.messages.SendPublicChatMessage;
+import org.bigbluebutton.red5.sub.messages.GetChatHistoryReplyMessage;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

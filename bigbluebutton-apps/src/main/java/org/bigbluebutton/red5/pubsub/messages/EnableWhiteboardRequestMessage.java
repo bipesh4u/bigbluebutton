@@ -2,10 +2,14 @@ package org.bigbluebutton.red5.pubsub.messages;
 
 import java.util.HashMap;
 
+import org.bigbluebutton.red5.pub.messages.Constants;
+import org.bigbluebutton.red5.pub.messages.MessageBuilder;
+import org.bigbluebutton.red5.sub.messages.ISubscribedMessage;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class EnableWhiteboardRequestMessage implements IMessage {
+public class EnableWhiteboardRequestMessage implements ISubscribedMessage {
 	public static final String ENABLE_WHITEBOARD_REQUEST = "enable_whiteboard_request";
 	public static final String VERSION = "0.0.1";
 

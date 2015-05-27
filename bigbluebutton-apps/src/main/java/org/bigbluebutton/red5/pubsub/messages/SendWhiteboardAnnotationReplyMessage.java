@@ -3,10 +3,16 @@ package org.bigbluebutton.red5.pubsub.messages;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bigbluebutton.red5.pub.messages.Constants;
+import org.bigbluebutton.red5.pub.messages.MessageBuilder;
+import org.bigbluebutton.red5.pub.messages.Util;
+import org.bigbluebutton.red5.sub.messages.ISubscribedMessage;
+
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class SendWhiteboardAnnotationReplyMessage implements IMessage {
+public class SendWhiteboardAnnotationReplyMessage implements ISubscribedMessage {
 	public static final String SEND_WHITEBOARD_ANNOTATION_REPLY = "send_whiteboard_shape_message";
 	public static final String VERSION = "0.0.1";
 

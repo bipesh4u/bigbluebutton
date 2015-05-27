@@ -1,29 +1,32 @@
 package org.bigbluebutton.red5.client;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-
 import org.bigbluebutton.conference.meeting.messaging.red5.BroadcastClientMessage;
 import org.bigbluebutton.conference.meeting.messaging.red5.ConnectionInvokerService;
 import org.bigbluebutton.conference.meeting.messaging.red5.DirectClientMessage;
-import org.bigbluebutton.red5.pubsub.messages.GetRecordingStatusReplyMessage;
-import org.bigbluebutton.red5.pubsub.messages.GetUsersReplyMessage;
-import org.bigbluebutton.red5.pubsub.messages.PresenterAssignedMessage;
-import org.bigbluebutton.red5.pubsub.messages.RecordingStatusChangedMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserJoinedMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserJoinedVoiceMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserLeftMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserLeftVoiceMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserListeningOnlyMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserLoweredHandMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserRaisedHandMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserSharedWebcamMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserStatusChangedMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserUnsharedWebcamMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserVoiceMutedMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserVoiceTalkingMessage;
-import org.bigbluebutton.red5.pubsub.messages.ValidateAuthTokenReplyMessage;
-import org.bigbluebutton.red5.pubsub.messages.ValidateAuthTokenTimeoutMessage;
+import org.bigbluebutton.red5.sub.messages.BroadcastLayoutMessage;
+import org.bigbluebutton.red5.sub.messages.GetCurrentLayoutReplyMessage;
+import org.bigbluebutton.red5.sub.messages.GetRecordingStatusReplyMessage;
+import org.bigbluebutton.red5.sub.messages.GetUsersReplyMessage;
+import org.bigbluebutton.red5.sub.messages.LockLayoutMessage;
+import org.bigbluebutton.red5.sub.messages.PresenterAssignedMessage;
+import org.bigbluebutton.red5.sub.messages.RecordingStatusChangedMessage;
+import org.bigbluebutton.red5.sub.messages.UserJoinedMessage;
+import org.bigbluebutton.red5.sub.messages.UserJoinedVoiceMessage;
+import org.bigbluebutton.red5.sub.messages.UserLeftMessage;
+import org.bigbluebutton.red5.sub.messages.UserLeftVoiceMessage;
+import org.bigbluebutton.red5.sub.messages.UserListeningOnlyMessage;
+import org.bigbluebutton.red5.sub.messages.UserLoweredHandMessage;
+import org.bigbluebutton.red5.sub.messages.UserRaisedHandMessage;
+import org.bigbluebutton.red5.sub.messages.UserSharedWebcamMessage;
+import org.bigbluebutton.red5.sub.messages.UserStatusChangedMessage;
+import org.bigbluebutton.red5.sub.messages.UserUnsharedWebcamMessage;
+import org.bigbluebutton.red5.sub.messages.UserVoiceMutedMessage;
+import org.bigbluebutton.red5.sub.messages.UserVoiceTalkingMessage;
+import org.bigbluebutton.red5.sub.messages.ValidateAuthTokenReplyMessage;
+import org.bigbluebutton.red5.sub.messages.ValidateAuthTokenTimeoutMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -154,10 +157,69 @@ public class UserClientMessageSender {
 						  processGetUsersReplyMessage(gurm);
 					  }
 					  break;
+				  case GetCurrentLayoutReplyMessage.GET_CURRENT_LAYOUT_REPLY:
+					  processGetCurrentLayoutReplyMessage(message);
+					  break;
+				  case BroadcastLayoutMessage.BROADCAST_LAYOUT:
+					  processBroadcastLayoutMessage(message);
+					  break;
+				  case LockLayoutMessage.LOCK_LAYOUT:
+					  processLockLayoutMessage(message);
+					  break;
 				}
 			}
 		}		
 	}
+
+	private void processLockLayoutMessage(String message) {
+		LockLayoutMessage msg = LockLayoutMessage.fromJson(message);
+		if (msg != null) {
+			  Map<String, Object> args = new HashMap<String, Object>();  
+			  args.put("locked", msg.locked);
+			  args.put("setById", msg.setByUserid);	    
+			  
+			  Iterator<String> usersIter = msg.users.iterator();
+			  while (usersIter.hasNext()){
+					String user = usersIter.next();
+				  	System.out.println("RedisPubSubMessageHandler - processLockLayoutMessage \n" + message + "\n");
+				  	DirectClientMessage m = new DirectClientMessage(msg.meetingId, user, "layoutLocked", args);
+					service.sendMessage(m);
+			  }
+		}
+	}
+	
+	private void processBroadcastLayoutMessage(String message) {
+		BroadcastLayoutMessage msg = BroadcastLayoutMessage.fromJson(message);
+		if (msg != null) {
+			  Map<String, Object> args = new HashMap<String, Object>();  
+			  args.put("locked", msg.locked);
+			  args.put("setByUserID", msg.setByUserid);	    
+			  args.put("layout", msg.layout);
+			  
+			  Iterator<String> usersIter = msg.users.iterator();
+			  while (usersIter.hasNext()){
+					String user = usersIter.next();
+				  	System.out.println("RedisPubSubMessageHandler - processBroadcastLayoutMessage \n" + message + "\n");
+				  	DirectClientMessage m = new DirectClientMessage(msg.meetingId, user, "syncLayout", args);
+					service.sendMessage(m);
+			  }
+		}
+	}
+	
+	private void processGetCurrentLayoutReplyMessage(String message) {
+		GetCurrentLayoutReplyMessage msg = GetCurrentLayoutReplyMessage.fromJson(message);
+		if (msg != null) {
+			  Map<String, Object> args = new HashMap<String, Object>();  
+			  args.put("locked", msg.locked);
+			  args.put("setById", msg.setByUserid);	    
+			  args.put("layout", msg.layout);
+			  		  	  
+		  	  System.out.println("RedisPubSubMessageHandler - processGetCurrentLayoutReplyMessage \n" + message + "\n");
+		  	  DirectClientMessage m = new DirectClientMessage(msg.meetingId, msg.requestedByUserid, "getCurrentLayoutResponse", args);
+			  service.sendMessage(m);	
+		}		
+	}
+	
 	private void processValidateAuthTokenReply(ValidateAuthTokenReplyMessage msg) {
 		  Map<String, Object> args = new HashMap<String, Object>();  
 		  args.put("userId", msg.userId);
@@ -365,8 +427,7 @@ public class UserClientMessageSender {
 		args.put("userId", msg.user.get("userId"));
 		
 		Map<String, Object> vuMap = (Map<String, Object>) msg.user.get("voiceUser");
-		
-		
+				
 		args.put("voiceUserId", (String) vuMap.get("userId"));
 		args.put("muted", (Boolean) vuMap.get("muted"));
 		  
@@ -386,8 +447,7 @@ public class UserClientMessageSender {
 		args.put("userId", msg.user.get("userId"));
 		
 		Map<String, Object> vuMap = (Map<String, Object>) msg.user.get("voiceUser");
-		
-		
+				
 		args.put("voiceUserId", (String) vuMap.get("userId"));
 		args.put("talking", (Boolean) vuMap.get("talking"));
 		  

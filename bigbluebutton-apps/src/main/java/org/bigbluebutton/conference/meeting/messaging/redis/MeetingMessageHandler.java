@@ -3,20 +3,20 @@ package org.bigbluebutton.conference.meeting.messaging.redis;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bigbluebutton.apps.sub.messages.UserConnectedToGlobalAudio;
+import org.bigbluebutton.apps.sub.messages.UserDisconnectedFromGlobalAudio;
 import org.bigbluebutton.conference.service.messaging.redis.MessageHandler;
 import org.bigbluebutton.core.api.IBigBlueButtonInGW;
-import org.bigbluebutton.red5.pubsub.messages.CreateMeetingMessage;
-import org.bigbluebutton.red5.pubsub.messages.DestroyMeetingMessage;
-import org.bigbluebutton.red5.pubsub.messages.EndMeetingMessage;
-import org.bigbluebutton.red5.pubsub.messages.GetAllMeetingsRequest;
-import org.bigbluebutton.red5.pubsub.messages.IMessage;
-import org.bigbluebutton.red5.pubsub.messages.KeepAliveMessage;
-import org.bigbluebutton.red5.pubsub.messages.MessageFromJsonConverter;
-import org.bigbluebutton.red5.pubsub.messages.MessagingConstants;
-import org.bigbluebutton.red5.pubsub.messages.RegisterUserMessage;
-import org.bigbluebutton.red5.pubsub.messages.UserConnectedToGlobalAudio;
-import org.bigbluebutton.red5.pubsub.messages.UserDisconnectedFromGlobalAudio;
-import org.bigbluebutton.red5.pubsub.messages.ValidateAuthTokenMessage;
+import org.bigbluebutton.red5.pub.messages.CreateMeetingMessage;
+import org.bigbluebutton.red5.pub.messages.DestroyMeetingMessage;
+import org.bigbluebutton.red5.pub.messages.EndMeetingMessage;
+import org.bigbluebutton.red5.pub.messages.GetAllMeetingsRequest;
+import org.bigbluebutton.red5.pub.messages.IPublishedMessage;
+import org.bigbluebutton.red5.pub.messages.KeepAliveMessage;
+import org.bigbluebutton.red5.pub.messages.MessageFromJsonConverter;
+import org.bigbluebutton.red5.pub.messages.MessagingConstants;
+import org.bigbluebutton.red5.pub.messages.RegisterUserMessage;
+import org.bigbluebutton.red5.pub.messages.ValidateAuthTokenMessage;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
@@ -33,7 +33,7 @@ public class MeetingMessageHandler implements MessageHandler {
 //		System.out.println("Checking message: " + pattern + " " + channel + " " + message);
 		if (channel.equalsIgnoreCase(MessagingConstants.TO_MEETING_CHANNEL)) {
 			System.out.println("Meeting message: " + channel + " " + message);
-			IMessage msg = MessageFromJsonConverter.convert(message);
+			IPublishedMessage msg = MessageFromJsonConverter.convert(message);
 			
 			if (msg != null) {
 				if (msg instanceof EndMeetingMessage) {
@@ -105,7 +105,7 @@ public class MeetingMessageHandler implements MessageHandler {
 				log.warn("Failed to decode message: [" + message + "]");
 			}
 		} else if (channel.equalsIgnoreCase(MessagingConstants.TO_SYSTEM_CHANNEL)) {
-			IMessage msg = MessageFromJsonConverter.convert(message);
+			IPublishedMessage msg = MessageFromJsonConverter.convert(message);
 			
 			if (msg != null) {
 				if (msg instanceof KeepAliveMessage) {
