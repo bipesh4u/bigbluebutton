@@ -1,10 +1,8 @@
 package org.bigbluebutton.red5.pubsub.messages;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -33,7 +31,6 @@ public class SendWhiteboardAnnotationReplyMessage implements IMessage {
 		payload.put(Constants.WHITEBOARD_ID, whiteboardId);
 		payload.put(Constants.REQUESTER_ID, requesterId);
 
-		System.out.println("SendWhiteboardAnnotationReplyMessage toJson");
 		java.util.HashMap<String, Object> header = MessageBuilder.buildHeader(SEND_WHITEBOARD_ANNOTATION_REPLY, VERSION, null);
 		return MessageBuilder.buildJson(header, payload);
 	}
@@ -61,8 +58,6 @@ public class SendWhiteboardAnnotationReplyMessage implements IMessage {
 						Util util = new Util();
 						Map<String, Object> annotation = util.extractOuterAnnotation(shape);
 
-
-						System.out.println("SendWhiteboardAnnotationReplyMessage fromJson");
 						return new SendWhiteboardAnnotationReplyMessage(meetingId, requesterId,
 								whiteboardId, annotation);
 					}

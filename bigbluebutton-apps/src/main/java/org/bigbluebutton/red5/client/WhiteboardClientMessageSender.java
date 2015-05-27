@@ -1,6 +1,5 @@
 package org.bigbluebutton.red5.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +32,6 @@ public class WhiteboardClientMessageSender {
 
 			if (header.has("name")) {
 				String messageName = header.get("name").getAsString();
-				System.out.println("AAAAAAAMEEESAGE:"+message);
 				switch (messageName) {
 				  case UndoWhiteboardReplyMessage.UNDO_WHITEBOARD_REPLY:
 					  UndoWhiteboardReplyMessage uwrm = UndoWhiteboardReplyMessage.fromJson(message);
@@ -78,7 +76,6 @@ public class WhiteboardClientMessageSender {
 		
 		Map<String, Object> shape = new HashMap<String, Object>();
 
-		System.out.println("\n\n"+msg.shape.toString() +"\n\n");
 		shape.put("id", msg.shape.get("id"));
 		shape.put("type", msg.shape.get("type"));
 		shape.put("status", msg.shape.get("status"));

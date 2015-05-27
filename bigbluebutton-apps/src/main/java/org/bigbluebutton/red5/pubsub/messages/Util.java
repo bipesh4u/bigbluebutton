@@ -302,7 +302,6 @@ public class Util {
 			finalAnnotation.put(Constants.ID, id);
 			finalAnnotation.put("type", type);
 			finalAnnotation.put("status", status);
-			finalAnnotation.put("status", status);
 
 			JsonElement shape = annotationElement.get("shape");
 			Map<String, Object> shapesMap = extractAnnotation((JsonObject)shape);
