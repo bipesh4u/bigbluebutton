@@ -31,10 +31,8 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
       case msg: GetPresentationInfoOutMsg           => handleGetPresentationInfoOutMsg(msg)
       case msg: SendCursorUpdateOutMsg              => handleSendCursorUpdateOutMsg(msg)
       case msg: ResizeAndMoveSlideOutMsg            => handleResizeAndMoveSlideOutMsg(msg)
-      case msg: GotoSlideOutMsg                     => handleGotoSlideOutMsg(msg)
       case msg: SharePresentationOutMsg             => handleSharePresentationOutMsg(msg)
       case msg: GetSlideInfoOutMsg                  => handleGetSlideInfoOutMsg(msg)
-      case msg: PresentationConversionProgress      => handlePresentationConversionProgress(msg)
       case msg: PresentationConversionError         => handlePresentationConversionError(msg)
       case msg: PresentationPageGenerated           => handlePresentationPageGenerated(msg)
       case msg: PresentationConversionDone          => handlePresentationConversionDone(msg)
@@ -44,24 +42,6 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
   
   private def handleClearPresentationOutMsg(msg: ClearPresentationOutMsg) {
       
-  }
-  
-  private def handlePresentationConversionProgress(msg: PresentationConversionProgress) {
-	val args = new java.util.HashMap[String, String]();
-	args.put("meetingID", msg.meetingID);
-	args.put("code", msg.code);
-	args.put("presentationID", msg.presentationId);
-	args.put("presentationName", msg.presentationName);
-	args.put("messageKey", msg.messageKey);
-	
-	val message = new java.util.HashMap[String, Object]() 
-	val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  	
-//  	println("PresentationClientMessageSender - handlePresentationConversionProgress \n" + message.get("msg") + "\n")
-
-    val m = new BroadcastClientMessage(msg.meetingID, "conversionUpdateMessageCallback", message);
-	service.sendMessage(m);	
   }
 
   private def handlePresentationConversionError(msg: PresentationConversionError) {
@@ -229,29 +209,7 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
 	val m = new BroadcastClientMessage(msg.meetingID, "moveCallback", message);
 	service.sendMessage(m);	    
   }
-  
-  private def handleGotoSlideOutMsg(msg: GotoSlideOutMsg) {
-	val args = new java.util.HashMap[String, Object]();
-	args.put("id", msg.page.id)
-	args.put("num", msg.page.num:java.lang.Integer)
-	args.put("current", msg.page.current:java.lang.Boolean)
-	args.put("swfUri", msg.page.swfUri)
-	args.put("txtUri", msg.page.txtUri)
-	args.put("pngUri", msg.page.pngUri)
-	args.put("thumbUri", msg.page.thumbUri)
-	args.put("xOffset", msg.page.xOffset:java.lang.Double);
-	args.put("yOffset", msg.page.yOffset:java.lang.Double);
-	args.put("widthRatio", msg.page.widthRatio:java.lang.Double);
-	args.put("heightRatio", msg.page.heightRatio:java.lang.Double);
 
-	val message = new java.util.HashMap[String, Object]() 
-	val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  		
-	val m = new BroadcastClientMessage(msg.meetingID, "goToSlideCallback", message);
-	service.sendMessage(m);	    
-  }
-  
   private def handleSharePresentationOutMsg(msg: SharePresentationOutMsg) {
 	val args = new java.util.HashMap[String, Object]();
 	
