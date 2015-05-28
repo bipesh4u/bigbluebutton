@@ -87,7 +87,6 @@ public class GoToSlideReplyMessage implements ISubscribedMessage {
 							page.put(Constants.CURRENT, current);
 							page.put(Constants.ID, id);
 
-							System.out.println("PAGEEE="+page.toString());
 						}
 						return new GoToSlideReplyMessage(meetingId, page);
 					}

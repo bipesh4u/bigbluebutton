@@ -9,6 +9,7 @@ import org.bigbluebutton.conference.meeting.messaging.red5.DirectClientMessage;
 import org.bigbluebutton.red5.pub.messages.GetPresentationInfoReplyMessage;
 import org.bigbluebutton.red5.pubsub.messages.GoToSlideReplyMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationConversionProgressMessage;
+import org.bigbluebutton.red5.pubsub.messages.PresentationPageGeneratedReplyMessage;
 import org.bigbluebutton.red5.sub.messages.PresentationRemovedMessage;
 import org.bigbluebutton.red5.pub.messages.Constants;
 
@@ -45,8 +46,35 @@ public class PresentationClientMessageSender {
 				  case PresentationConversionProgressMessage.PRESENTATION_CONVERSION_PROGRESS:
 					  processPresentationConversionProgress(message);
 					  break;
+				  case PresentationPageGeneratedReplyMessage.PRESENTATION_PAGE_GENERATED:
+					  processPresentationPageGeneratedReply(message);
+					  break;
 				}
 			}
+		}
+	}
+
+	private void processPresentationPageGeneratedReply(String json) {
+		PresentationPageGeneratedReplyMessage msg = PresentationPageGeneratedReplyMessage.fromJson(json);
+		if (msg != null) {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("presentationID", msg.presentationId);
+			args.put("meetingID", msg.meetingId);
+			args.put("code", msg.code);
+			args.put("messageKey", msg.messageKey);
+			args.put("presentationName", msg.presentationName);
+			args.put("pagesCompleted", msg.pagesCompleted);
+			args.put("numberOfPages", msg.numPages);
+
+			Map<String, Object> message = new HashMap<String, Object>();
+			Gson gson = new Gson();
+			message.put("msg", gson.toJson(args));
+
+			System.out.println("RedisPubSubMessageHandler - processPresentationConversionProgress \n"
+			+ message.get("msg") + "\n");
+
+			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "generatedSlideUpdateMessageCallback", message);
+			service.sendMessage(m);
 		}
 	}
 
