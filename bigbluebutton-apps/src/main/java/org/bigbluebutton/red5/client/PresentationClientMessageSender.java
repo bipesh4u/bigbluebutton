@@ -8,8 +8,11 @@ import org.bigbluebutton.conference.meeting.messaging.red5.ConnectionInvokerServ
 import org.bigbluebutton.conference.meeting.messaging.red5.DirectClientMessage;
 import org.bigbluebutton.red5.pub.messages.GetPresentationInfoReplyMessage;
 import org.bigbluebutton.red5.pubsub.messages.GoToSlideReplyMessage;
+import org.bigbluebutton.red5.pubsub.messages.PresentationConversionErrorMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationConversionProgressMessage;
+import org.bigbluebutton.red5.pubsub.messages.PresentationCursorUpdateMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationPageGeneratedReplyMessage;
+import org.bigbluebutton.red5.sub.messages.GetSlideInfoReplyMessage;
 import org.bigbluebutton.red5.sub.messages.PresentationRemovedMessage;
 import org.bigbluebutton.red5.pub.messages.Constants;
 
@@ -49,8 +52,63 @@ public class PresentationClientMessageSender {
 				  case PresentationPageGeneratedReplyMessage.PRESENTATION_PAGE_GENERATED:
 					  processPresentationPageGeneratedReply(message);
 					  break;
+				  case PresentationCursorUpdateMessage.PRESENTATION_CURSOR_UPDATED:
+						  processPresentationCursorUpdate(message);
+						  break;
+				  case PresentationConversionErrorMessage.PRESENTATION_CONVERSION_ERROR:
+					  processPresentationConversionError(message);
+					  break;
+				  case GetSlideInfoReplyMessage.GET_SLIDE_INFO:
+					  processGetSlideInfoReply(message);
+					  break;
 				}
 			}
+		}
+	}
+
+	private void processGetSlideInfoReply(String json) {
+		GetSlideInfoReplyMessage msg = GetSlideInfoReplyMessage.fromJson(json);
+		if (msg != null) {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("meetingID", msg.meetingId);
+			args.put("xOffset", msg.xOffset);
+			args.put("yOffest", msg.yOffset);
+			args.put("widthRatio", msg.widthRatio);
+			args.put("heightRatio", msg.heightRatio);
+
+			Map<String, Object> message = new HashMap<String, Object>();
+			Gson gson = new Gson();
+			message.put("msg", gson.toJson(args));
+
+			System.out.println("RedisPubSubMessageHandler - processGetSlideInfoReply \n"
+			+ message.get("msg") + "\n");
+
+			DirectClientMessage m = new DirectClientMessage(msg.meetingId, msg.requesterId, "getSlideInfoReply", message);
+			service.sendMessage(m);
+		}
+	}
+
+	private void processPresentationConversionError(String json) {
+
+	}
+
+	private void processPresentationCursorUpdate(String json) {
+		PresentationCursorUpdateMessage msg = PresentationCursorUpdateMessage.fromJson(json);
+		if (msg != null) {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("meetingID", msg.meetingId);
+			args.put("xPercent", msg.xPercent);
+			args.put("yPercent", msg.yPercent);
+
+			Map<String, Object> message = new HashMap<String, Object>();
+			Gson gson = new Gson();
+			message.put("msg", gson.toJson(args));
+
+//			System.out.println("RedisPubSubMessageHandler - processPresentationConversionProgress \n"
+//			+ message.get("msg") + "\n");
+
+			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "PresentationCursorUpdateCommand", message);
+			service.sendMessage(m);
 		}
 	}
 
@@ -70,8 +128,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processPresentationConversionProgress \n"
-			+ message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processPresentationConversionProgress \n"
+//			+ message.get("msg") + "\n");
 
 			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "generatedSlideUpdateMessageCallback", message);
 			service.sendMessage(m);
@@ -92,8 +150,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processPresentationConversionProgress \n"
-			+ message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processPresentationConversionProgress \n"
+//			+ message.get("msg") + "\n");
 
 			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "conversionUpdateMessageCallback", message);
 			service.sendMessage(m);
@@ -110,7 +168,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processPresentationRemovedMessage \n" + message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processPresentationRemovedMessage \n" +
+//			message.get("msg") + "\n");
 
 			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "removePresentationCallback", message);
 			service.sendMessage(m);
@@ -129,7 +188,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processGetPresentationInfoReplyMessage \n" + message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processGetPresentationInfoReplyMessage \n" +
+//			message.get("msg") + "\n");
 
 			DirectClientMessage m = new DirectClientMessage(msg.meetingId, msg.requesterId, "getPresentationInfoReply", message);
 			service.sendMessage(m);
@@ -156,8 +216,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processGoToSlideMessage \n"
-			+ message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processGoToSlideMessage \n"
+//			+ message.get("msg") + "\n");
 
 			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "goToSlideCallback", message);
 			service.sendMessage(m);

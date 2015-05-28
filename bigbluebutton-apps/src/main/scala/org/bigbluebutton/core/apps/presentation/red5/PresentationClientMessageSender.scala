@@ -26,42 +26,14 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
     
   def handleMessage(msg: IOutMessage) {
     msg match {
-      case msg: ClearPresentationOutMsg             => handleClearPresentationOutMsg(msg)
       case msg: GetPresentationInfoOutMsg           => handleGetPresentationInfoOutMsg(msg)
-      case msg: SendCursorUpdateOutMsg              => handleSendCursorUpdateOutMsg(msg)
       case msg: ResizeAndMoveSlideOutMsg            => handleResizeAndMoveSlideOutMsg(msg)
       case msg: SharePresentationOutMsg             => handleSharePresentationOutMsg(msg)
-      case msg: GetSlideInfoOutMsg                  => handleGetSlideInfoOutMsg(msg)
-      case msg: PresentationConversionError         => handlePresentationConversionError(msg)
       case msg: PresentationConversionDone          => handlePresentationConversionDone(msg)
       case _ => // do nothing
     }
   }
   
-  private def handleClearPresentationOutMsg(msg: ClearPresentationOutMsg) {
-      
-  }
-
-  private def handlePresentationConversionError(msg: PresentationConversionError) {
-    val args = new java.util.HashMap[String, String]();
-	args.put("meetingID", msg.meetingID);
-	args.put("code", msg.code);
-	args.put("presentationID", msg.presentationId);
-	args.put("presentationName", msg.presentationName);
-	args.put("messageKey", msg.messageKey);
-	args.put("numberOfPages", msg.numberOfPages.toString);
-	args.put("maxNumberPages", msg.maxNumberPages.toString);
-
-	val message = new java.util.HashMap[String, Object]() 
-	val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  	
-//  	println("PresentationClientMessageSender - handlePresentationConversionError \n" + message.get("msg") + "\n")
-
-	val m = new BroadcastClientMessage(msg.meetingID, "pageCountExceededUpdateMessageCallback", message);
-    service.sendMessage(m);    
-  }
-
   private def handlePresentationConversionDone(msg: PresentationConversionDone) {
     val args = new java.util.HashMap[String, Object]()
 	args.put("meetingID", msg.meetingID);
@@ -141,19 +113,7 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
 	val m = new DirectClientMessage(msg.meetingID, msg.requesterID, "getPresentationInfoReply", message);
 //	service.sendMessage(m);	
   }
-  
-  private def handleSendCursorUpdateOutMsg(msg: SendCursorUpdateOutMsg) {
-	val args = new java.util.HashMap[String, Object]();
-	args.put("xPercent", msg.xPercent:java.lang.Double);
-	args.put("yPercent", msg.yPercent:java.lang.Double);
 
-	val message = new java.util.HashMap[String, Object]() 
-	val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  	  	
-	val m = new BroadcastClientMessage(msg.meetingID, "PresentationCursorUpdateCommand", message);
-	service.sendMessage(m);	    
-  }
   
   private def handleResizeAndMoveSlideOutMsg(msg: ResizeAndMoveSlideOutMsg) {
 	val args = new java.util.HashMap[String, Object]();
@@ -201,20 +161,5 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
   	  	
 	val m = new BroadcastClientMessage(msg.meetingID, "sharePresentationCallback", message);
 	service.sendMessage(m);	    
-  }
-  
-  private def handleGetSlideInfoOutMsg(msg: GetSlideInfoOutMsg) {
-    val args = new java.util.HashMap[String, Object]();
-    args.put("xOffset", msg.page.xOffset:java.lang.Double);
-    args.put("yOffest", msg.page.yOffset:java.lang.Double);
-    args.put("widthRatio", msg.page.widthRatio:java.lang.Double);
-    args.put("heightRatio", msg.page.heightRatio:java.lang.Double);	
-
-    val message = new java.util.HashMap[String, Object]() 
-    val gson = new Gson();
-    message.put("msg", gson.toJson(args))
-  	
-    val m = new DirectClientMessage(msg.meetingID, msg.requesterID, "getPresentationInfoReply", message);
-    service.sendMessage(m);    
   }
 }
