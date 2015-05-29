@@ -57,11 +57,10 @@ public class PresentationConversionDoneMessage implements ISubscribedMessage {
 						&& payload.has(Constants.PRESENTATION)) {
 						String meetingId = payload.get(Constants.MEETING_ID).getAsString();
 						String code = payload.get(Constants.CODE).getAsString();
-						
-						
+
 						JsonObject presObj = (JsonObject) payload.get(Constants.PRESENTATION).getAsJsonObject();
 						Map<String, Object> presentation = new HashMap<String, Object>();
-						
+
 						if (presObj.has("id") 
 								&& presObj.has("name")
 								&& presObj.has("current")
@@ -81,8 +80,6 @@ public class PresentationConversionDoneMessage implements ISubscribedMessage {
 							ArrayList<Map<String, Object>> pagesList = util.extractPages(pages);
 
 							presentation.put("pages", pagesList);
-
-							System.out.println("\n\n\npagesList: "+pagesList.toString());
 
 							return new PresentationConversionDoneMessage(meetingId, code, presentation);
 						}

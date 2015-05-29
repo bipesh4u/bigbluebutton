@@ -13,6 +13,7 @@ import org.bigbluebutton.red5.pubsub.messages.PresentationConversionErrorMessage
 import org.bigbluebutton.red5.pubsub.messages.PresentationConversionProgressMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationCursorUpdateMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationPageGeneratedReplyMessage;
+import org.bigbluebutton.red5.pubsub.messages.PresentationPageResizedMessage;
 import org.bigbluebutton.red5.sub.messages.GetSlideInfoReplyMessage;
 import org.bigbluebutton.red5.sub.messages.PresentationRemovedMessage;
 import org.bigbluebutton.red5.pub.messages.Constants;
@@ -54,8 +55,8 @@ public class PresentationClientMessageSender {
 					  processPresentationPageGeneratedReply(message);
 					  break;
 				  case PresentationCursorUpdateMessage.PRESENTATION_CURSOR_UPDATED:
-						  processPresentationCursorUpdate(message);
-						  break;
+					  processPresentationCursorUpdate(message);
+					  break;
 				  case PresentationConversionErrorMessage.PRESENTATION_CONVERSION_ERROR:
 					  processPresentationConversionError(message);
 					  break;
@@ -65,8 +66,41 @@ public class PresentationClientMessageSender {
 				  case PresentationConversionDoneMessage.PRESENTATION_CONVERSION_DONE:
 					  processPresentationConversionDone(message);
 					  break;
+				  case PresentationPageResizedMessage.PRESENTATION_PAGE_RESIZED:
+					  processPresentationPageResized(message);
+					  break;
 				}
 			}
+		}
+	}
+
+	private void processPresentationPageResized(String json) {
+
+		PresentationPageResizedMessage msg = PresentationPageResizedMessage.fromJson(json);
+		if (msg != null) {
+			Map<String, Object> args = new HashMap<String, Object>();
+
+			args.put("id", msg.page.get("id"));
+			args.put("num", msg.page.get("num"));
+			args.put("current", msg.page.get("current"));
+			args.put("swfUri", msg.page.get("swf_uri"));
+			args.put("txtUri", msg.page.get("txt_uri"));
+			args.put("pngUri", msg.page.get("png_uri"));
+			args.put("thumbUri", msg.page.get("thumb_uri"));
+			args.put("xOffset", msg.page.get("x_offset"));
+			args.put("yOffset", msg.page.get("y_offset"));
+			args.put("widthRatio", msg.page.get("width_ratio"));
+			args.put("heightRatio", msg.page.get("height_ratio"));
+
+			Map<String, Object> message = new HashMap<String, Object>();
+			Gson gson = new Gson();
+			message.put("msg", gson.toJson(args));
+
+//			System.out.println("RedisPubSubMessageHandler - processPresentationPageResized \n"
+//			+ message.get("msg") + "\n");
+
+			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "moveCallback", message);
+			service.sendMessage(m);
 		}
 	}
 
@@ -90,8 +124,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processPresentationConversionDone \n"
-			+ message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processPresentationConversionDone \n"
+//			+ message.get("msg") + "\n");
 
 			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "conversionCompletedUpdateMessageCallback", message);
 			service.sendMessage(m);
@@ -112,8 +146,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-			System.out.println("RedisPubSubMessageHandler - processGetSlideInfoReply \n"
-			+ message.get("msg") + "\n");
+//			System.out.println("RedisPubSubMessageHandler - processGetSlideInfoReply \n"
+//			+ message.get("msg") + "\n");
 
 			DirectClientMessage m = new DirectClientMessage(msg.meetingId, msg.requesterId, "getSlideInfoReply", message);
 			service.sendMessage(m);

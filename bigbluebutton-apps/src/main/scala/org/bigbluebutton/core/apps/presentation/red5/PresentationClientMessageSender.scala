@@ -26,81 +26,9 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
     
   def handleMessage(msg: IOutMessage) {
     msg match {
-      case msg: GetPresentationInfoOutMsg           => handleGetPresentationInfoOutMsg(msg)
-      case msg: ResizeAndMoveSlideOutMsg            => handleResizeAndMoveSlideOutMsg(msg)
       case msg: SharePresentationOutMsg             => handleSharePresentationOutMsg(msg)
       case _ => // do nothing
     }
-  }
-  private def handleGetPresentationInfoOutMsg(msg: GetPresentationInfoOutMsg) {
-    val info = msg.info
-    
-    // Build JSON
-    val args = new java.util.HashMap[String, Object]()
-	  args.put("meetingID", msg.meetingID);
-	
-    // Create a map for our current presenter
-    val presenter = new java.util.HashMap[String, String]()
-    presenter.put("userId", info.presenter.userId)
-    presenter.put("name", info.presenter.name)
-    presenter.put("assignedBy", info.presenter.assignedBy)
-	
-    args.put("presenter", presenter)
-    
-    // Create an array for our presentations
-    val presentations = new ArrayList[java.util.HashMap[String, Object]]     
-    info.presentations.foreach { pres =>
-	   val presentation = new java.util.HashMap[String, Object]();
-	   presentation.put("id", pres.id)
-	   presentation.put("name", pres.name)
-	   presentation.put("current", pres.current:java.lang.Boolean)      
-	   
-	   // Get the pages for a presentation
-       val pages = new ArrayList[Page]()	
-	   pres.pages.values foreach {p =>
-         pages.add(p)
-       }   
-	  // store the pages in the presentation 
-	  presentation.put("pages", pages)
-	
-	  // add this presentation into our presentations list
-	  presentations.add(presentation);	   
-    }
-    
-    // add the presentation to our map to complete our json
-    args.put("presentations", presentations)
-
-    val message = new java.util.HashMap[String, Object]() 
-	  val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  	 	
-  	println("***** PresentationClientMessageSender - handleGetPresentationInfoOutMsg to user[" +msg.requesterID + "] message[" + message.get("msg") + "]")
-  	
-	val m = new DirectClientMessage(msg.meetingID, msg.requesterID, "getPresentationInfoReply", message);
-//	service.sendMessage(m);	
-  }
-
-  
-  private def handleResizeAndMoveSlideOutMsg(msg: ResizeAndMoveSlideOutMsg) {
-	val args = new java.util.HashMap[String, Object]();
-	args.put("id", msg.page.id)
-	args.put("num", msg.page.num:java.lang.Integer)
-	args.put("current", msg.page.current:java.lang.Boolean)
-	args.put("swfUri", msg.page.swfUri)
-	args.put("txtUri", msg.page.txtUri)
-	args.put("pngUri", msg.page.pngUri)
-	args.put("thumbUri", msg.page.thumbUri)
-	args.put("xOffset", msg.page.xOffset:java.lang.Double);
-	args.put("yOffset", msg.page.yOffset:java.lang.Double);
-	args.put("widthRatio", msg.page.widthRatio:java.lang.Double);
-	args.put("heightRatio", msg.page.heightRatio:java.lang.Double);
-
-	val message = new java.util.HashMap[String, Object]() 
-	val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  	  	
-	val m = new BroadcastClientMessage(msg.meetingID, "moveCallback", message);
-	service.sendMessage(m);	    
   }
 
   private def handleSharePresentationOutMsg(msg: SharePresentationOutMsg) {

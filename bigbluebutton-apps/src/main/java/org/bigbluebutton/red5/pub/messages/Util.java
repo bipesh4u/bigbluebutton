@@ -433,7 +433,6 @@ public class Util {
 			JsonElement page = pagesIter.next();
 
 			Map<String, Object> pageMap = extractPage((JsonObject)page);
-			System.out.println("pageMap:" + pageMap.toString());
 			if (pageMap != null) {
 				collection.add(pageMap);
 			}
@@ -441,18 +440,7 @@ public class Util {
 		return collection;
 	}
 
-	private Map<String, Object> extractPage(JsonObject page) {
-
-//		final String WIDTH_RATIO = "widthRatio";
-//		final String Y_OFFSET = "yOffset";
-//		final String NUM = "num";
-//		final String HEIGHT_RATIO = "heightRatio";
-//		final String X_OFFSET = "xOffset";
-//		final String PNG_URI = "pngUri";
-//		final String THUMB_URI = "thumbUri";
-//		final String TXT_URI = "txtUri";
-//		final String CURRENT = "current";
-//		final String SWF_URI = "swfUri";
+	public Map<String, Object> extractPage(JsonObject page) {
 
 		final String WIDTH_RATIO = "width_ratio";
 		final String Y_OFFSET = "y_offset";
@@ -480,11 +468,11 @@ public class Util {
 			Map<String, Object> finalPage = new HashMap<String, Object>();
 
 			String id = page.get(Constants.ID).getAsString();
-			int widthRatio = page.get(WIDTH_RATIO).getAsInt();
-			int yOffset = page.get(Y_OFFSET).getAsInt();
-			int num = page.get(NUM).getAsInt();
-			int heightRatio = page.get(HEIGHT_RATIO).getAsInt();
-			int xOffset = page.get(X_OFFSET).getAsInt();
+			double widthRatio = page.get(WIDTH_RATIO).getAsDouble();
+			double yOffset = page.get(Y_OFFSET).getAsDouble();
+			double num = page.get(NUM).getAsDouble();
+			double heightRatio = page.get(HEIGHT_RATIO).getAsDouble();
+			double xOffset = page.get(X_OFFSET).getAsDouble();
 			String pngUri = page.get(PNG_URI).getAsString();
 			String thumbUri = page.get(THUMB_URI).getAsString();
 			boolean current = page.get(CURRENT).getAsBoolean();
@@ -503,11 +491,9 @@ public class Util {
 			finalPage.put(TXT_URI, txtUri);
 			finalPage.put(SWF_URI, swfUri);
 
-			System.out.println("finalPage:"+finalPage.toString());
 			return finalPage;
 		}
 
-		System.out.println("returning null1");
 		return null;
 	}
 }
