@@ -29,43 +29,9 @@ class PresentationClientMessageSender(service: ConnectionInvokerService) extends
       case msg: GetPresentationInfoOutMsg           => handleGetPresentationInfoOutMsg(msg)
       case msg: ResizeAndMoveSlideOutMsg            => handleResizeAndMoveSlideOutMsg(msg)
       case msg: SharePresentationOutMsg             => handleSharePresentationOutMsg(msg)
-      case msg: PresentationConversionDone          => handlePresentationConversionDone(msg)
       case _ => // do nothing
     }
   }
-  
-  private def handlePresentationConversionDone(msg: PresentationConversionDone) {
-    val args = new java.util.HashMap[String, Object]()
-	args.put("meetingID", msg.meetingID);
-	args.put("code", msg.code);
-	
-	val presentation = new java.util.HashMap[String, Object]();
-	presentation.put("id", msg.presentation.id)
-	presentation.put("name", msg.presentation.name)
-	presentation.put("current", msg.presentation.current:java.lang.Boolean)
-	
-	val pages = new ArrayList[Page]()
-	
-	msg.presentation.pages.values foreach {p =>
-//      println("PresentationClientMessageSender **** Page [" + p.id + "," + p.num + "]")
-      pages.add(p)
-    }
-	
-	presentation.put("pages", pages)
-	
-	args.put("presentation", presentation);
-
-	val message = new java.util.HashMap[String, Object]() 
-	val gson = new Gson();
-  	message.put("msg", gson.toJson(args))
-  		
-//  	println("PresentationClientMessageSender - handlePresentationConversionDone \n" + message.get("msg") + "\n")
-
-	val m = new BroadcastClientMessage(msg.meetingID, "conversionCompletedUpdateMessageCallback", message);
-    service.sendMessage(m);      
-  }
- 
-  
   private def handleGetPresentationInfoOutMsg(msg: GetPresentationInfoOutMsg) {
     val info = msg.info
     

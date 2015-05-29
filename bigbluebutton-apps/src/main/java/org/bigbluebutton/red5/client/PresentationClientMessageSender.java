@@ -8,6 +8,7 @@ import org.bigbluebutton.conference.meeting.messaging.red5.ConnectionInvokerServ
 import org.bigbluebutton.conference.meeting.messaging.red5.DirectClientMessage;
 import org.bigbluebutton.red5.pub.messages.GetPresentationInfoReplyMessage;
 import org.bigbluebutton.red5.pubsub.messages.GoToSlideReplyMessage;
+import org.bigbluebutton.red5.pubsub.messages.PresentationConversionDoneMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationConversionErrorMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationConversionProgressMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationCursorUpdateMessage;
@@ -61,8 +62,39 @@ public class PresentationClientMessageSender {
 				  case GetSlideInfoReplyMessage.GET_SLIDE_INFO:
 					  processGetSlideInfoReply(message);
 					  break;
+				  case PresentationConversionDoneMessage.PRESENTATION_CONVERSION_DONE:
+					  processPresentationConversionDone(message);
+					  break;
 				}
 			}
+		}
+	}
+
+	private void processPresentationConversionDone(String json) {
+
+		PresentationConversionDoneMessage msg = PresentationConversionDoneMessage.fromJson(json);
+		if (msg != null) {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("meetingID", msg.meetingId);
+			args.put("code", msg.code);
+
+			Map<String, Object> presentation = new HashMap<String, Object>();
+			presentation.put("id", msg.presentation.get("id"));
+			presentation.put("name", msg.presentation.get("name"));
+			presentation.put("current", msg.presentation.get("current"));
+			presentation.put("pages", msg.presentation.get("pages"));
+
+			args.put("presentation", presentation);
+
+			Map<String, Object> message = new HashMap<String, Object>();
+			Gson gson = new Gson();
+			message.put("msg", gson.toJson(args));
+
+			System.out.println("RedisPubSubMessageHandler - processPresentationConversionDone \n"
+			+ message.get("msg") + "\n");
+
+			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "conversionCompletedUpdateMessageCallback", message);
+			service.sendMessage(m);
 		}
 	}
 
