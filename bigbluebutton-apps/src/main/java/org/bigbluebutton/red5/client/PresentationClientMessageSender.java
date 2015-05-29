@@ -14,6 +14,7 @@ import org.bigbluebutton.red5.pubsub.messages.PresentationConversionProgressMess
 import org.bigbluebutton.red5.pubsub.messages.PresentationCursorUpdateMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationPageGeneratedReplyMessage;
 import org.bigbluebutton.red5.pubsub.messages.PresentationPageResizedMessage;
+import org.bigbluebutton.red5.pubsub.messages.PresentationSharedMessage;
 import org.bigbluebutton.red5.sub.messages.GetSlideInfoReplyMessage;
 import org.bigbluebutton.red5.sub.messages.PresentationRemovedMessage;
 import org.bigbluebutton.red5.pub.messages.Constants;
@@ -69,8 +70,37 @@ public class PresentationClientMessageSender {
 				  case PresentationPageResizedMessage.PRESENTATION_PAGE_RESIZED:
 					  processPresentationPageResized(message);
 					  break;
+				  case PresentationSharedMessage.PRESENTATION_SHARED_MESSAGE:
+					  processPresentationSharedMessage(message);
+					  break;
 				}
 			}
+		}
+	}
+
+	private void processPresentationSharedMessage(String json) {
+
+		PresentationSharedMessage msg = PresentationSharedMessage.fromJson(json);
+		if (msg != null) {
+
+			Map<String, Object> presentation = new HashMap<String, Object>();
+			presentation.put("id", msg.presentation.get("id"));
+			presentation.put("name", msg.presentation.get("name"));
+			presentation.put("current", msg.presentation.get("current"));
+			presentation.put("pages", msg.presentation.get("pages"));
+
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("presentation", presentation);
+
+			Map<String, Object> message = new HashMap<String, Object>();
+			Gson gson = new Gson();
+			message.put("msg", gson.toJson(args));
+
+//			System.out.println("RedisPubSubMessageHandler - processPresentationSharedMessage \n"
+//			+ message.get("msg") + "\n");
+
+			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "sharePresentationCallback", message);
+			service.sendMessage(m);
 		}
 	}
 
@@ -282,8 +312,8 @@ public class PresentationClientMessageSender {
 			Gson gson = new Gson();
 			message.put("msg", gson.toJson(args));
 
-//			System.out.println("RedisPubSubMessageHandler - processGoToSlideMessage \n"
-//			+ message.get("msg") + "\n");
+			System.out.println("RedisPubSubMessageHandler - processGoToSlideMessage \n"
+			+ message.get("msg") + "\n");
 
 			BroadcastClientMessage m = new BroadcastClientMessage(msg.meetingId, "goToSlideCallback", message);
 			service.sendMessage(m);

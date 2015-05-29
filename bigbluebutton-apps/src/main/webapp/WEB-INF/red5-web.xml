@@ -103,7 +103,6 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 	<bean id="outMsgGW" class="org.bigbluebutton.core.api.MessageOutGateway">
 		<property name="listeners">
 			<set>
-				<ref bean="presentationRed5ClientSender" />
 				<ref bean="presentationRedisRecorder" />
 				<ref bean="presentationRedisPublisher" />
 				<ref bean="usersRedisRecorder" />
@@ -120,10 +119,6 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 				<ref bean="whiteboardEventRedisPublisher"/>
 			</set>
 		 </property>
-	</bean>
-
-	<bean id="presentationRed5ClientSender" class="org.bigbluebutton.core.apps.presentation.red5.PresentationClientMessageSender">
-		<constructor-arg index="0" ref="connInvokerService"/>
 	</bean>
 
 	<bean id="presentationRedisRecorder" class="org.bigbluebutton.core.apps.presentation.redis.PresentationEventRedisRecorder">
