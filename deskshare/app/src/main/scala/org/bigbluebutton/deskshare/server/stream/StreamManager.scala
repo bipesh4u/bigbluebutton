@@ -18,14 +18,13 @@
 */
 package org.bigbluebutton.deskshare.server.stream
 
+import akka.actor.{ActorLogging, Actor}
 import org.bigbluebutton.deskshare.server.red5.DeskshareApplication
 import org.red5.server.api.scope.IScope
 import org.red5.server.api.so.ISharedObject
 
 import java.util.ArrayList
 
-import scala.actors.Actor
-import scala.actors.Actor._
 import scala.collection.mutable.HashMap
 import org.bigbluebutton.deskshare.server.recorder._
 
@@ -34,9 +33,8 @@ import net.lag.logging.Logger
 case class IsStreamPublishing(room: String)
 case class StreamPublishingReply(publishing: Boolean, width: Int, height: Int)
 
-class StreamManager(record:Boolean, recordingService:RecordingService) extends Actor {
-	private val log = Logger.get
- 
+class StreamManager(record:Boolean, recordingService:RecordingService) extends Actor with ActorLogging {
+
 	var app: DeskshareApplication = null
  	
 	def setDeskshareApplication(a: DeskshareApplication) {
@@ -49,27 +47,23 @@ class StreamManager(record:Boolean, recordingService:RecordingService) extends A
 	private val streams = new HashMap[String, DeskshareStream]
  
 
-	def act() = {
-	  loop {
-	    react {
-	      case cs: AddStream => {
-	    	  log.debug("StreamManager: Adding stream %s", cs.room)
-	    	  streams += cs.room -> cs.stream
-	        }
-	      case ds: RemoveStream => {
-	    	  log.debug("StreamManager: Removing Stream %s", ds.room)
-	    	  streams -= ds.room
-	      	}
-	      case is: IsStreamPublishing => {
-	    	  log.debug("StreamManager: Received IsStreamPublishing message for %s", is.room)
-	    	  streams.get(is.room) match {
-	    	    case Some(str) =>  reply(new StreamPublishingReply(true, str.width, str.height))
-	    	    case None => reply(new StreamPublishingReply(false, 0, 0))
-	    	  }
-	      	}
-	      case m: Any => log.warning("StreamManager: StreamManager received unknown message: %s", m)
-	    }
-	  }
+	def receive = {
+		case cs: AddStream => {
+			log.debug("StreamManager: Adding stream %s", cs.room)
+			streams += cs.room -> cs.stream
+			}
+		case ds: RemoveStream => {
+			log.debug("StreamManager: Removing Stream %s", ds.room)
+			streams -= ds.room
+			}
+		case is: IsStreamPublishing => {
+			log.debug("StreamManager: Received IsStreamPublishing message for %s", is.room)
+			streams.get(is.room) match {
+				case Some(str) =>  sender() ! new StreamPublishingReply(true, str.width, str.height)
+				case None => sender() ! new StreamPublishingReply(false, 0, 0)
+			}
+			}
+		case m: Any => log.warning("StreamManager: StreamManager received unknown message: %s", m)
 	}
  
 	def createStream(room: String, width: Int, height: Int): Option[DeskshareStream] = {	  	  
@@ -99,13 +93,13 @@ class StreamManager(record:Boolean, recordingService:RecordingService) extends A
   		this ! new RemoveStream(room)
   	}  	
    
-  	override def exit() : Nothing = {
+	def exit() : Unit = {
 	  log.warning("StreamManager: **** Exiting  Actor")
-	  super.exit()
+		context.stop(self)
 	}
  
-	override def exit(reason : AnyRef) : Nothing = {
+	def exit(reason : AnyRef) : Unit = {
 	  log.warning("StreamManager: **** Exiting Actor with reason %s")
-	  super.exit(reason)
+		context.stop(self)
 	}
 }

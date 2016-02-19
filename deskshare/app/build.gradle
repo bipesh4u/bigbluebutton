@@ -15,7 +15,7 @@ task resolveDeps(type: Copy) {
 }
 
 /*
- * Seems like we need this here and in the sub-projects section for testng to resolve.
+ * Seems like we need this here and in the sub-projects section for testing to resolve.
  * (ralam Oct 4, 2009)
  */
 repositories {
@@ -121,17 +121,16 @@ dependencies {
   // ralam (Feb 27, 2013) 
   providedCompile 'commons-fileupload:commons-fileupload:1.2.2@jar'
   providedCompile 'commons-io:commons-io:2.1@jar' 
-    
-  // Libraries needed to run the scala tools
-  scalaTools 'org.scala-lang:scala-compiler:2.9.2'
-  scalaTools 'org.scala-lang:scala-library:2.9.2'
 
   // workaround for http://issues.gradle.org/browse/GRADLE-1273
   //compileScala.classpath = sourceSets.main.compileClasspath + files(sourceSets.main.classesDir)
   //compileTestScala.classpath = sourceSets.test.compileClasspath + files(sourceSets.test.classesDir)
 	
+	// Libraries for Akka
+	compile 'com.typesafe.akka:akka-actor_2.11:2.4.2'
+	compile 'com.typesafe.akka:akka-slf4j_2.11:2.4.2'
+
   // Libraries needed for scala api
-  compile 'org.scala-lang:scala-library:2.9.2'   
   compile 'net.lag:configgy:2.0.0@jar'
     
   //redis

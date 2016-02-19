@@ -22,9 +22,8 @@ package org.bigbluebutton.deskshare.server.sessions
 import org.bigbluebutton.deskshare.server.svc1.{BlockManager, Dimension}
 import org.bigbluebutton.deskshare.server.stream.{StreamManager, Stream, UpdateStream, StartStream, StopStream, UpdateStreamMouseLocation}
 
-import scala.actors.Actor
-import scala.actors.Actor._
-import net.lag.logging.Logger
+import akka.actor.{ActorLogging, Actor}
+import akka.actor.Actor._
 import java.awt.Point
 
 case object StartSession
@@ -34,10 +33,11 @@ case class UpdateSessionMouseLocation(loc: Point, seqNum: Int)
 case object StopSession
 case object GenerateKeyFrame
 
-class SessionSVC(sessionManager:SessionManagerSVC, room: String, screenDim: Dimension, 
-                 blockDim: Dimension, streamManager: StreamManager, keyFrameInterval: Int, interframeInterval: Int, waitForAllBlocks: Boolean, useSVC2: Boolean) extends Actor {
-	private val log = Logger.get
- 
+class SessionSVC(sessionManager:SessionManagerSVC, room: String, screenDim: Dimension,
+								 blockDim: Dimension, streamManager: StreamManager,
+								 keyFrameInterval: Int, interframeInterval: Int, waitForAllBlocks: Boolean,
+								 useSVC2: Boolean) extends Actor with ActorLogging{
+
 	private var blockManager: BlockManager = new BlockManager(room, screenDim, blockDim, waitForAllBlocks, useSVC2)
 	private var stream:Stream = null
 	private var lastUpdate:Long = System.currentTimeMillis()
@@ -84,40 +84,36 @@ def scheduleGenerateFrame() {
     }
   }
 	
-	def act() = {
-      loop {
-        react {
-          case StartSession => initialize()
-          case StopSession => stopSession()    
-          case ml: UpdateSessionMouseLocation => mouseLoc = ml.loc 
-          case "GenerateFrame" => {
-	            generateFrame(false)
-	            if (!stop) {
-	              scheduleGenerateFrame()
-	            } else {
-	              exit()
-	            }
-            }
-          case GenerateKeyFrame => {
-            // do not generate a key frame every time a user joins as we
-            // generate key frames regularly now.
-        	  //scheduleGenerateKeyFrame(keyFrameInterval)
-          }
-          case "GenerateAKeyFrame" => {
-            pendingGenKeyFrameRequest = false
-            log.debug("Session: Generating Key Frame for room %s", room)
-            generateFrame(true)     
-            lastKeyFrameSentOn = System.currentTimeMillis()
-            if (!stop) {
-                scheduleGenerateFrame()
-            } else {
-                exit()
-            }     	  
-          }
-          case b: UpdateSessionBlock => updateBlock(b.position, b.blockData, b.keyframe, b.seqNum)
-          case m: Any => log.warning("Session: Unknown message [%s]", m)
-        }
-      }
+	def receive = {
+		case StartSession => initialize()
+		case StopSession => stopSession()
+		case ml: UpdateSessionMouseLocation => mouseLoc = ml.loc
+		case "GenerateFrame" => {
+				generateFrame(false)
+				if (!stop) {
+					scheduleGenerateFrame()
+				} else {
+					exit()
+				}
+			}
+		case GenerateKeyFrame => {
+			// do not generate a key frame every time a user joins as we
+			// generate key frames regularly now.
+			//scheduleGenerateKeyFrame(keyFrameInterval)
+		}
+		case "GenerateAKeyFrame" => {
+			pendingGenKeyFrameRequest = false
+			log.debug("Session: Generating Key Frame for room %s", room)
+			generateFrame(true)
+			lastKeyFrameSentOn = System.currentTimeMillis()
+			if (!stop) {
+					scheduleGenerateFrame()
+			} else {
+					exit()
+			}
+		}
+		case b: UpdateSessionBlock => updateBlock(b.position, b.blockData, b.keyframe, b.seqNum)
+		case m: Any => log.warning("Session: Unknown message [%s]", m)
     }
 
 	def initMe():Boolean = {	   
@@ -179,13 +175,13 @@ def scheduleGenerateFrame() {
 		}
 	}
  
-	override def  exit() : Nothing = {
+	override def  exit() : Unit = {
 	  log.warning("Session: **** Exiting  Actor for room %s", room)
-	  super.exit()
+	  context.stop(self)
 	}
  
-	override def exit(reason : AnyRef) : Nothing = {
+	override def exit(reason : AnyRef) : Unit = {
 	  log.warning("Session: **** Exiting Actor %s for room %s", reason, room)
-	  super.exit(reason)
+	  context.stop(self)
 	}
 }

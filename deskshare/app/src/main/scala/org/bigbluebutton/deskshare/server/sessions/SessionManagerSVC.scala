@@ -18,8 +18,7 @@
 */
 package org.bigbluebutton.deskshare.server.sessions
 
-import scala.actors.Actor
-import scala.actors.Actor._
+import akka.actor.{ActorLogging, Actor}
 import net.lag.logging.Logger
 import scala.collection.mutable.HashMap
 import org.bigbluebutton.deskshare.server.svc1.Dimension
@@ -35,26 +34,23 @@ case class StopSharingDesktop(meetingId: String, stream: String)
 case class IsSharingStopped(meetingId: String)
 case class IsSharingStoppedReply(meetingId: String, stopped: Boolean)
 
-class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, interframeInterval: Int, waitForAllBlocks: Boolean) extends Actor {
+class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, interframeInterval: Int,
+												waitForAllBlocks: Boolean) extends Actor with ActorLogging {
 	private val log = Logger.get 
  
  	private val sessions = new HashMap[String, SessionSVC]
  	private val stoppedSessions = new HashMap[String, String]
 	
-	def act() = {
-	  loop {
-	    react {
-	      case msg: CreateSession => createSession(msg); printMailbox("CreateSession") 
-	      case msg: RemoveSession => removeSession(msg.room); printMailbox("RemoveSession")
-	      case msg: SendKeyFrame => sendKeyFrame(msg.room); printMailbox("SendKeyFrame")
-	      case msg: UpdateBlock => updateBlock(msg.room, msg.position, msg.blockData, msg.keyframe, msg.seqNum)
-	      case msg: UpdateMouseLocation => updateMouseLocation(msg.room, msg.mouseLoc, msg.seqNum)
-	      case msg: StopSharingDesktop => handleStopSharingDesktop(msg)
-	      case msg: IsSharingStopped   => handleIsSharingStopped(msg)
-	      
-	      case msg: Any => log.warning("SessionManager: Unknown message " + msg); printMailbox("Any")
-	    }
-	  }
+	def receive = {
+		case msg: CreateSession => createSession(msg); printMailbox("CreateSession")
+		case msg: RemoveSession => removeSession(msg.room); printMailbox("RemoveSession")
+		case msg: SendKeyFrame => sendKeyFrame(msg.room); printMailbox("SendKeyFrame")
+		case msg: UpdateBlock => updateBlock(msg.room, msg.position, msg.blockData, msg.keyframe, msg.seqNum)
+		case msg: UpdateMouseLocation => updateMouseLocation(msg.room, msg.mouseLoc, msg.seqNum)
+		case msg: StopSharingDesktop => handleStopSharingDesktop(msg)
+		case msg: IsSharingStopped   => handleIsSharingStopped(msg)
+
+		case msg: Any => log.warning("SessionManager: Unknown message " + msg); printMailbox("Any")
 	}
  
 	private def handleStopSharingDesktop(msg: StopSharingDesktop) {
@@ -65,8 +61,8 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 	
 	private def handleIsSharingStopped(msg: IsSharingStopped) {
 	  stoppedSessions.get(msg.meetingId) match {
-	    case Some(s) => reply(new IsSharingStoppedReply(msg.meetingId, true))
-	    case None    => reply(new IsSharingStoppedReply(msg.meetingId, false))
+	    case Some(s) => sender() ! new IsSharingStoppedReply(msg.meetingId, true)
+	    case None    => sender() ! new IsSharingStoppedReply(msg.meetingId, false)
 	  }
 	}
 	
@@ -130,13 +126,13 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 		}
 	}
 		
-	override def  exit() : Nothing = {
+	def exit() : Unit = {
 	  log.warning("SessionManager: **** Exiting Actor")
-	  super.exit()
+	  context.stop(self)
 	}
  
-	override def exit(reason : AnyRef) : Nothing = {
+	def exit(reason : AnyRef) : Unit = {
 	  log.warning("SessionManager: **** Exiting SessionManager Actor %s", reason)
-	  super.exit(reason)
+		context.stop(self)
 	}
 }
