@@ -18,8 +18,9 @@
 */
 package org.bigbluebutton.deskshare.server.sessions
 
-import akka.actor.{ActorLogging, Actor}
+import akka.actor.{Props, ActorLogging, Actor}
 import net.lag.logging.Logger
+import org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem
 import scala.collection.mutable.HashMap
 import org.bigbluebutton.deskshare.server.svc1.Dimension
 import org.bigbluebutton.deskshare.server.stream.StreamManager
@@ -35,12 +36,12 @@ case class IsSharingStopped(meetingId: String)
 case class IsSharingStoppedReply(meetingId: String, stopped: Boolean)
 
 class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, interframeInterval: Int,
-												waitForAllBlocks: Boolean) extends Actor with ActorLogging {
-	private val log = Logger.get 
+												waitForAllBlocks: Boolean, actorSystem: DeskshareActorSystem) extends Actor with ActorLogging {
+//	private val log = Logger.get
  
  	private val sessions = new HashMap[String, SessionSVC]
  	private val stoppedSessions = new HashMap[String, String]
-	
+
 	def receive = {
 		case msg: CreateSession => createSession(msg); printMailbox("CreateSession")
 		case msg: RemoveSession => removeSession(msg.room); printMailbox("RemoveSession")
@@ -56,7 +57,7 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 	private def handleStopSharingDesktop(msg: StopSharingDesktop) {
     sessions.get(msg.meetingId) foreach { s =>
       stoppedSessions += msg.meetingId -> msg.stream
-    }	  
+    }
 	}
 	
 	private def handleIsSharingStopped(msg: IsSharingStopped) {
@@ -67,13 +68,16 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 	}
 	
 	private def printMailbox(caseMethod: String) {
-	  log.debug("SessionManager: mailbox %d message %s", mailboxSize, caseMethod)
+	  log.debug("SessionManager: mailbox message %s", caseMethod)
 	}
  
 	private def sendKeyFrame(room: String) {
-		log.debug("SessionManager: Request to send key frame for room %s", room)  
+		log.debug("SessionManager: Request to send key frame for room %s", room)
         sessions.get(room) match {
-          case Some(s) => s ! GenerateKeyFrame
+          case Some(s) =>
+//						 s ! GenerateKeyFrame
+						var aSessionActor = actorSystem.actorOf(Props(s), "aSessionActor")
+						aSessionActor ! GenerateKeyFrame
           case None => log.warning("SessionManager: Could not find room %s", room)
         }
 	}
@@ -83,12 +87,15 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 		sessions.get(c.room) match {
 		  case None => {
 			  log.debug("SessionManager: Created session " + c.room)
-			  val session: SessionSVC = new SessionSVC(this, c.room, c.screenDim, c.blockDim, streamManager, keyFrameInterval, interframeInterval, waitForAllBlocks, c.useSVC2) 
+			  val session: SessionSVC = new SessionSVC(this, c.room, c.screenDim, c.blockDim,
+					streamManager, keyFrameInterval, interframeInterval, waitForAllBlocks, c.useSVC2, actorSystem)
+
 			  if (session.initMe()) {
 				  val old:Int = sessions.size
 				  sessions += c.room -> session
-				  session.start			  
-				  session ! StartSession
+//				  session.start
+					var aSessionActor = actorSystem.actorOf(Props(session), "aSessionActor")
+					aSessionActor ! StartSession
 				  log.debug("CreateSession: Session length [%d,%d]", old, sessions.size)			    
 			  } else {
 			    log.error("SessionManager:Failed to create session for %s", c.room)
@@ -102,7 +109,9 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 	private def removeSession(meetingId: String): Unit = {
 		log.debug("SessionManager: Removing session " + meetingId);
     	sessions.get(meetingId) foreach { s =>
-	    	s ! StopSession; log.debug("++++ REMOVE SESSION +++%s", meetingId);
+				var aSessionActor = actorSystem.actorOf(Props(s), "aSessionActor")
+				aSessionActor ! StopSession
+				log.debug("++++ REMOVE SESSION +++%s", meetingId);
 	      val old:Int = sessions.size
 	      sessions -= meetingId; 
 	      log.debug("RemoveSession: Session length [%d,%d]", old, sessions.size)
@@ -114,25 +123,29 @@ class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, int
 	
 	private def updateMouseLocation(room: String, mouseLoc: Point, seqNum: Int): Unit = {
 		sessions.get(room) match {
-		  case Some(s) => s ! new UpdateSessionMouseLocation(mouseLoc, seqNum)
+		  case Some(s) =>
+				var aSessionActor = actorSystem.actorOf(Props(s), "aSessionActor")
+				aSessionActor ! new UpdateSessionMouseLocation(mouseLoc, seqNum)
 		  case None => log.warning("SessionManager: Could not update mouse loc for session %s. Does not exist.", room)
 		}
 	}
 	
 	private def updateBlock(room: String, position: Int, blockData: Array[Byte], keyframe: Boolean, seqNum: Int): Unit = {
 		sessions.get(room) match {
-		  case Some(s) => s ! new UpdateSessionBlock(position, blockData, keyframe, seqNum)
+		  case Some(s) =>
+				var aSessionActor = actorSystem.actorOf(Props(s), "aSessionActor")
+				aSessionActor ! new UpdateSessionBlock(position, blockData, keyframe, seqNum)
 		  case None => log.warning("SessionManager: Could not update session %s. Does not exist.", room)
 		}
 	}
 		
-	def exit() : Unit = {
-	  log.warning("SessionManager: **** Exiting Actor")
-	  context.stop(self)
-	}
- 
-	def exit(reason : AnyRef) : Unit = {
-	  log.warning("SessionManager: **** Exiting SessionManager Actor %s", reason)
-		context.stop(self)
-	}
+//	def exit() : Unit = {
+//	  log.warning("SessionManager: **** Exiting Actor")
+//	  context.stop(self)
+//	}
+//
+//	def exit(reason : AnyRef) : Unit = {
+//	  log.warning("SessionManager: **** Exiting SessionManager Actor %s", reason)
+//		context.stop(self)
+//	}
 }

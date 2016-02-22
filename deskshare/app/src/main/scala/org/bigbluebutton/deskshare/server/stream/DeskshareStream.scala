@@ -19,7 +19,7 @@
 package org.bigbluebutton.deskshare.server.stream
 
 import org.bigbluebutton.deskshare.server.recorder.Recorder
-import org.bigbluebutton.deskshare.server.red5.DeskshareApplication
+import org.bigbluebutton.deskshare.server.red5.{DeskshareActorSystem, DeskshareApplication}
 import org.bigbluebutton.deskshare.server.ScreenVideoBroadcastStream
 import org.bigbluebutton.deskshare.server.RtmpClientAdapter
 import org.red5.server.api.IContext
@@ -30,12 +30,15 @@ import org.red5.server.stream.IProviderService
 import org.red5.server.net.rtmp.message.Constants
 import org.apache.mina.core.buffer.IoBuffer
 import java.util.ArrayList
-import akka.actor.Actor
-import akka.actor.Actor._
+import akka.actor.{Props, ActorSystem, Actor}
 
+//object DeskshareStream {
+//  def props(system: ActorSystem,app: DeskshareApplication, name: String, width: Int,
+//						height: Int, record: Boolean, recorder: Recorder): Props = Props(classOf[DeskshareStream], system)
+//}
 
 class DeskshareStream(app: DeskshareApplication, name: String, val width: Int,
-											val height: Int, record: Boolean, recorder: Recorder) extends Stream {
+											val height: Int, record: Boolean, recorder: Recorder, actorSystem: DeskshareActorSystem) extends Stream {
 	private var broadcastStream:ScreenVideoBroadcastStream = null
 	private var dsClient:RtmpClientAdapter = null
 		
@@ -50,33 +53,33 @@ class DeskshareStream(app: DeskshareApplication, name: String, val width: Int,
 	}
  
 	def initializeStream():Boolean = {
-	   app.createScreenVideoBroadcastStream(name) match {
-	     case None => return false
-	     case Some(bs) => {
-	     		broadcastStream = bs; 
-		       	app.createDeskshareClient(name) match {
-				     case None => return false
-				     case Some(dsc:RtmpClientAdapter) => {
-				     		dsClient = dsc; 
-				     		recorder.addListener(dsClient)
-				     		return true
-				     }       
-		       }	
-	       }     	
-	   } 
-	   return false
+		app.createScreenVideoBroadcastStream(name) match {
+			case None => return false
+			case Some(bs) => {
+				broadcastStream = bs
+				app.createDeskshareClient(name) match {
+					case None => return false
+					case Some(dsc:RtmpClientAdapter) => {
+						dsClient = dsc
+						recorder.addListener(dsClient)
+						return true
+					}
+				}
+			}
+		}
+		return false
 	}
  
 	private def stopStream() = {
 		log.debug("DeskShareStream: Stopping stream %s", name)
 		log.info("DeskShareStream: Sending deskshareStreamStopped for %s", name)
 		if (record) {
-	  		recorder.stop()
-	  	}
+			recorder.stop()
+		}
 		dsClient.sendDeskshareStreamStopped(new ArrayList[Object]())
 		broadcastStream.stop()
-	    broadcastStream.close()	  
-	    exit()
+		broadcastStream.close()
+		exit()
 	}
 	
 	private def startStream() = {
@@ -84,7 +87,7 @@ class DeskshareStream(app: DeskshareApplication, name: String, val width: Int,
 	  if (record) {
 	  	recorder.start()
 	  }
-   	  dsClient.sendDeskshareStreamStarted(width, height)
+		dsClient.sendDeskshareStreamStarted(width, height)
 	}
 	
 	private def updateStreamMouseLocation(ml: UpdateStreamMouseLocation) = {
@@ -118,12 +121,12 @@ class DeskshareStream(app: DeskshareApplication, name: String, val width: Int,
 		
 	}
  
-	override def  exit() : Unit = {
+	def  exit() : Unit = {
 	  log.warning("DeskShareStream: **** Exiting  Actor for room %s", name)
 		context.stop(self)
 	}
- 
-	override def exit(reason : AnyRef) : Unit = {
+
+	def exit(reason : AnyRef) : Unit = {
 	  log.warning("DeskShareStream: **** Exiting Actor %s for room %s", reason, name)
 		context.stop(self)
 	}

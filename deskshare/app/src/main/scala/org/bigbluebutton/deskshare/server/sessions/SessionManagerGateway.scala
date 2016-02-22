@@ -18,22 +18,24 @@
 */
 package org.bigbluebutton.deskshare.server.sessions
 
-import akka.actor.ActorSystem
+import akka.actor.Props
+import org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem
 import org.bigbluebutton.deskshare.server.svc1.Dimension
 import org.bigbluebutton.deskshare.server.stream.StreamManager
 import org.bigbluebutton.deskshare.server.session.ISessionManagerGateway
 import java.awt.Point
 import net.lag.logging.Logger
 
-class SessionManagerGateway(val system: ActorSystem, streamManager: StreamManager, keyFrameInterval: Int,
-														interframeInterval: Int, waitForAllBlocks: Boolean) extends ISessionManagerGateway {
+class SessionManagerGateway(streamManager: StreamManager, keyFrameInterval: Int,
+														interframeInterval: Int, waitForAllBlocks: Boolean,
+													 actorSystem: DeskshareActorSystem) extends ISessionManagerGateway {
 	
-//	private val log = Logger.get
-	val log = system.log
+	private val log = Logger.get
 
-	streamManager.start
-	val sessionManager: SessionManagerSVC = new SessionManagerSVC(streamManager, keyFrameInterval, interframeInterval, waitForAllBlocks)
-  sessionManager.start
+//	streamManager.start
+//	val sessionManager: SessionManagerSVC = new SessionManagerSVC(streamManager, keyFrameInterval, interframeInterval, waitForAllBlocks)
+	val sessionManager = actorSystem.actorOf(Props[SessionManagerSVC], "sessionManager") //TODO pass props
+//  sessionManager.start
 
 	def createSession(room: String, screenDim: org.bigbluebutton.deskshare.common.Dimension, blockDim: org.bigbluebutton.deskshare.common.Dimension, seqNum: Int, useSVC2: Boolean): Unit = {
 		log.info("SessionManagerGateway:createSession for %s", room)

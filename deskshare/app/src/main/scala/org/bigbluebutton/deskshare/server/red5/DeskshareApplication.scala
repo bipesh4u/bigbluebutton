@@ -27,8 +27,7 @@ import org.bigbluebutton.deskshare.server.RtmpClientAdapter
 import org.bigbluebutton.deskshare.server.stream.StreamManager
 import org.bigbluebutton.deskshare.server.socket.DeskShareServer
 import org.bigbluebutton.deskshare.server.MultiThreadedAppAdapter
-import akka.actor.Actor
-import akka.actor.Actor._
+import akka.actor.{ActorSystem, Actor}
 import net.lag.configgy.Configgy
 import net.lag.logging.Logger
 import java.io.File
@@ -37,12 +36,12 @@ import org.red5.server.api.scope.{IScope}
 import org.red5.server.util.ScopeUtils
 import com.google.gson.Gson
 
-class DeskshareApplication(streamManager: StreamManager, deskShareServer: DeskShareServer) extends MultiThreadedAppAdapter {
-	private val deathSwitch = new CountDownLatch(1)
+class DeskshareApplication(actorSystem: DeskshareActorSystem, streamManager: StreamManager, deskShareServer: DeskShareServer) extends MultiThreadedAppAdapter {
+//	private val deathSwitch = new CountDownLatch(1)
 
 	// load our config file and configure logfiles.
 	Configgy.configure("webapps/deskshare/WEB-INF/deskshare.conf")
- 
+
 	private val logger = Logger.get 
 	var appScope: IScope = null
  
@@ -54,9 +53,10 @@ class DeskshareApplication(streamManager: StreamManager, deskShareServer: DeskSh
 		else println("APPSCOPE is NOT NULL!!!!")
   
 		// make sure there's always one actor running so scala 2.7.2 doesn't kill off the actors library.
-		actor {
-			deathSwitch.await
-		}
+//		actor {
+//			deathSwitch.await
+//		}
+
     
 		streamManager.setDeskshareApplication(this)
 		deskShareServer.start();

@@ -37,6 +37,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     <property name="virtualHosts" value="${webapp.virtualHosts}"/>
   </bean>
   <bean id="web.handler" class="org.bigbluebutton.deskshare.server.red5.DeskshareApplication">
+    <constructor-arg ref="actorSystem"/>
     <constructor-arg ref="streamManager"/>
     <constructor-arg ref="deskShareServer"/>
   </bean>
@@ -57,10 +58,12 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     <constructor-arg index="1" value="${keyFrameInterval}"/>
     <constructor-arg index="2" value="${interframeInterval}"/>
     <constructor-arg index="3" value="${waitForAllBlocks}"/>
+    <constructor-arg index="4" ref="actorSystem"/>
   </bean>
   <bean id="streamManager" class="org.bigbluebutton.deskshare.server.stream.StreamManager">
     <constructor-arg index="0" value="true"/>
     <constructor-arg index="1" ref="recordingService"/>
+    <constructor-arg index="2" ref="actorSystem"/>
   </bean>
   <bean id="recordingService" class="org.bigbluebutton.deskshare.server.recorder.FileRecordingServiceImp">
     <property name="recordingDirectory" value="${recordingDirectory}"/>
@@ -70,5 +73,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     <constructor-arg index="0" value="${redis.host}"/>
     <constructor-arg index="1" value="${redis.port}"/>
     <constructor-arg index="2" value="${redis.keyExpiry}"/>
+  </bean>
+  <bean id="actorSystem" class="org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem">
   </bean>
 </beans>

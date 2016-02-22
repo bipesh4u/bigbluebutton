@@ -19,12 +19,15 @@
 package org.bigbluebutton.deskshare.server.sessions
 
 
+import org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem
 import org.bigbluebutton.deskshare.server.svc1.{BlockManager, Dimension}
-import org.bigbluebutton.deskshare.server.stream.{StreamManager, Stream, UpdateStream, StartStream, StopStream, UpdateStreamMouseLocation}
+import org.bigbluebutton.deskshare.server.stream._
 
-import akka.actor.{ActorLogging, Actor}
+import akka.actor.{Props, ActorLogging, Actor}
 import akka.actor.Actor._
 import java.awt.Point
+
+import scala.concurrent.{Await, Future}
 
 case object StartSession
 case class UpdateSessionBlock(position: Int, blockData: Array[Byte], keyframe: Boolean, seqNum: Int)
@@ -36,7 +39,7 @@ case object GenerateKeyFrame
 class SessionSVC(sessionManager:SessionManagerSVC, room: String, screenDim: Dimension,
 								 blockDim: Dimension, streamManager: StreamManager,
 								 keyFrameInterval: Int, interframeInterval: Int, waitForAllBlocks: Boolean,
-								 useSVC2: Boolean) extends Actor with ActorLogging{
+								 useSVC2: Boolean, actorSystem: DeskshareActorSystem) extends Actor with ActorLogging{
 
 	private var blockManager: BlockManager = new BlockManager(room, screenDim, blockDim, waitForAllBlocks, useSVC2)
 	private var stream:Stream = null
@@ -49,7 +52,10 @@ class SessionSVC(sessionManager:SessionManagerSVC, room: String, screenDim: Dime
 	private var lastKeyFrameSentOn = 0L
   private var streamStartedOn = 0L
   private var streamStarted = false
-  
+
+	private var sessionManagerActor = actorSystem.actorOf(Props(sessionManager), "sessionManager")
+	private var streamActor = actorSystem.actorOf(Props(stream), "deskshareStream")
+
 	/*
 	 * Schedule to generate a key frame after 30seconds of a request.
 	 * This prevents us from generating unnecessary key frames when
@@ -59,16 +65,23 @@ class SessionSVC(sessionManager:SessionManagerSVC, room: String, screenDim: Dime
 		if (!pendingGenKeyFrameRequest) {
 			pendingGenKeyFrameRequest = true
 			val mainActor = self
-			actor {
+//			actor {
+//				Thread.sleep(waitSec)
+//				mainActor ! "GenerateAKeyFrame"
+//			}
+
+
+			streamActor ! {
 				Thread.sleep(waitSec)
 				mainActor ! "GenerateAKeyFrame"
 			}
+
 		}
 	}
 	
 def scheduleGenerateFrame() {
     val mainActor = self
-    actor {
+	streamActor ! {
       Thread.sleep(interframeInterval)
       val now = System.currentTimeMillis()
       if ((now - lastKeyFrameSentOn) > 60000) {
@@ -127,14 +140,14 @@ def scheduleGenerateFrame() {
 		log.debug("Session: Starting session %s", room)
 		blockManager.initialize()	
 		stop = false
-		stream ! StartStream
+		streamActor ! StartStream
 		generateFrame(true)
 		scheduleGenerateFrame()
 	}
  
 	private def stopSession() {
 		log.debug("Session: Stopping session %s", room)
-		stream ! StopStream
+		streamActor ! StopStream
 		stop = true
 		streamManager.destroyStream(room)
 		blockManager = null
@@ -158,7 +171,7 @@ def scheduleGenerateFrame() {
 	private def generateFrame(keyframe:Boolean) {				  
 		if (System.currentTimeMillis() - lastUpdate > 60000) {
 			log.warning("Session: Did not received updates for more than 1 minute. Removing session %s", room)
-			sessionManager ! new RemoveSession(room)
+			sessionManagerActor ! new RemoveSession(room)
 		} else {
 		  if (blockManager != null) {
 
@@ -169,18 +182,18 @@ def scheduleGenerateFrame() {
         }
         
         val ts = now - streamStartedOn
-			  stream ! new UpdateStream(room, blockManager.generateFrame(keyframe), ts)
-			  stream ! new UpdateStreamMouseLocation(room, mouseLoc)
+			  streamActor ! new UpdateStream(room, blockManager.generateFrame(keyframe), ts)
+			  streamActor ! new UpdateStreamMouseLocation(room, mouseLoc)
 		  }
 		}
 	}
  
-	override def  exit() : Unit = {
+	def  exit() : Unit = {
 	  log.warning("Session: **** Exiting  Actor for room %s", room)
 	  context.stop(self)
 	}
  
-	override def exit(reason : AnyRef) : Unit = {
+	def exit(reason : AnyRef) : Unit = {
 	  log.warning("Session: **** Exiting Actor %s for room %s", reason, room)
 	  context.stop(self)
 	}
