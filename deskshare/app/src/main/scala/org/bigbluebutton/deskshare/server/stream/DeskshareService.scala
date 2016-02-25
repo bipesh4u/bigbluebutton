@@ -18,13 +18,20 @@
 */
 package org.bigbluebutton.deskshare.server.stream
 
+import akka.actor.Props
+import org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem
+import akka.pattern.ask
+import scala.concurrent.duration._
+
+import scala.util.{Failure, Success}
 import org.bigbluebutton.deskshare.server.sessions.SessionManagerGateway
 import org.red5.server.api.Red5
 import java.util.HashMap
 import net.lag.logging.Logger
 
-class DeskshareService(streamManager: StreamManager, sessionGateway: SessionManagerGateway) {
+class DeskshareService(actorSystem: DeskshareActorSystem, streamManager: StreamManager, sessionGateway: SessionManagerGateway) {
 	private val log = Logger.get
+	implicit def executionContext = actorSystem.system.dispatcher
  
 	def checkIfStreamIsPublishing(room:String): HashMap[String, Any] = {
 //		val room: String = Red5.getConnectionLocal().getScope().getName();
@@ -32,15 +39,21 @@ class DeskshareService(streamManager: StreamManager, sessionGateway: SessionMana
 		var publishing = false
 		var width = 0
 		var height = 0
-  
-		streamManager !? (3000, IsStreamPublishing(room)) match {
-		  	case None => log.warning("DeskshareService: Timeout waiting for reply to IsStreamPublishing for room %s", room)
-		  	case Some(rep) => {
-		  		val reply = rep.asInstanceOf[StreamPublishingReply]
-		  		publishing = reply.publishing
-		  		width = reply.width
-		  		height = reply.height
-		  	}
+
+		val streamManagerActor = actorSystem.actorOf(Props(streamManager))
+		val future = streamManagerActor.ask(IsStreamPublishing(room))(3.seconds)
+		future onComplete {
+			case Success(rep) => {
+				val reply = rep.asInstanceOf[StreamPublishingReply]
+				publishing = reply.publishing
+				width = reply.width
+				height = reply.height
+				log.info("CASE1111111")
+			}
+			case Failure(failure) => {
+				log.warning("DeskshareService: Timeout waiting for reply to IsStreamPublishing for room %s", room)
+				log.warning("CASE2222222")
+			}
 		}
     
 		val stream = new HashMap[String, Any]()
