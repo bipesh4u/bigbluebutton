@@ -19,7 +19,6 @@
 package org.bigbluebutton.deskshare.server.sessions
 
 import akka.actor.{Props, ActorLogging, Actor}
-import net.lag.logging.Logger
 import org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem
 import scala.collection.mutable.HashMap
 import org.bigbluebutton.deskshare.server.svc1.Dimension
@@ -37,8 +36,7 @@ case class IsSharingStoppedReply(meetingId: String, stopped: Boolean)
 
 class SessionManagerSVC(streamManager: StreamManager, keyFrameInterval: Int, interframeInterval: Int,
 												waitForAllBlocks: Boolean, actorSystem: DeskshareActorSystem) extends Actor with ActorLogging {
-//	private val log = Logger.get
- 
+
  	private val sessions = new HashMap[String, SessionSVC]
  	private val stoppedSessions = new HashMap[String, String]
 

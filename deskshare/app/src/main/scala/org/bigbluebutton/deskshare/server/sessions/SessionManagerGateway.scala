@@ -24,17 +24,15 @@ import org.bigbluebutton.deskshare.server.svc1.Dimension
 import org.bigbluebutton.deskshare.server.stream.StreamManager
 import org.bigbluebutton.deskshare.server.session.ISessionManagerGateway
 import java.awt.Point
-import net.lag.logging.Logger
 import akka.pattern.ask
 import scala.concurrent.duration._
 
 import scala.util.{Failure, Success}
 
 class SessionManagerGateway(streamManager: StreamManager, keyFrameInterval: Int,
-interframeInterval: Int, waitForAllBlocks: Boolean,
-actorSystem: DeskshareActorSystem) extends ISessionManagerGateway {
+														interframeInterval: Int, waitForAllBlocks: Boolean,
+														actorSystem: DeskshareActorSystem) extends ISessionManagerGateway {
 
-	private val log = Logger.get
 	implicit def executionContext = actorSystem.system.dispatcher
 
 	//	streamManager.start
@@ -77,13 +75,11 @@ actorSystem: DeskshareActorSystem) extends ISessionManagerGateway {
 		val future = sessionManager.ask(IsSharingStopped(meetingId))(3.seconds)
 		future onComplete {
 			case Success(result) => {
-				match {
-					case None => stopped = true
-					case Some(rep) => {
-						val reply = rep.asInstanceOf[IsSharingStoppedReply]
-						stopped = reply.stopped
-					}
-				}
+//				case None => stopped = true
+//				case Some(rep) => {
+//					val reply = rep.asInstanceOf[IsSharingStoppedReply]
+//					stopped = reply.stopped
+//				}
 				// TODO handle the some and none case
 				log.info("CASE1111111")
 			}

@@ -19,6 +19,7 @@
 package org.bigbluebutton.deskshare.server.stream
 
 import akka.actor.Props
+import org.slf4j.LoggerFactory
 import org.bigbluebutton.deskshare.server.red5.DeskshareActorSystem
 import akka.pattern.ask
 import scala.concurrent.duration._
@@ -27,12 +28,11 @@ import scala.util.{Failure, Success}
 import org.bigbluebutton.deskshare.server.sessions.SessionManagerGateway
 import org.red5.server.api.Red5
 import java.util.HashMap
-import net.lag.logging.Logger
 
 class DeskshareService(actorSystem: DeskshareActorSystem, streamManager: StreamManager, sessionGateway: SessionManagerGateway) {
-	private val log = Logger.get
 	implicit def executionContext = actorSystem.system.dispatcher
- 
+	private val log = LoggerFactory.getLogger(classOf[DeskshareService])
+
 	def checkIfStreamIsPublishing(room:String): HashMap[String, Any] = {
 //		val room: String = Red5.getConnectionLocal().getScope().getName();
 		log.debug("Checking if %s is streaming.", room)
@@ -51,8 +51,8 @@ class DeskshareService(actorSystem: DeskshareActorSystem, streamManager: StreamM
 				log.info("CASE1111111")
 			}
 			case Failure(failure) => {
-				log.warning("DeskshareService: Timeout waiting for reply to IsStreamPublishing for room %s", room)
-				log.warning("CASE2222222")
+				log.warn("DeskshareService: Timeout waiting for reply to IsStreamPublishing for room %s", room)
+				log.warn("CASE2222222")
 			}
 		}
     

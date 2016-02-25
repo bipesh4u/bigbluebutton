@@ -18,14 +18,14 @@
 */
 package org.bigbluebutton.deskshare.server;
 
-import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.logging.Red5LoggerFactory;
-import org.red5.codec.IVideoStreamCodec;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.codec.IVideoStreamCodec;
 
 public class ScreenVideo implements IVideoStreamCodec {
 
-	private Logger log = Red5LoggerFactory.getLogger(ScreenVideo.class, "deskshare");
+	private static final Logger log = LoggerFactory.getLogger(ScreenVideo.class);
 	static final String CODEC_NAME = "ScreenVideo";
 	static final byte FLV_FRAME_KEY = 0x10;
 	static final byte FLV_CODEC_SCREEN = 0x03;

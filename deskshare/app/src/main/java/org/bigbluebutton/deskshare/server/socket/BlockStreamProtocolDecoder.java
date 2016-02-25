@@ -32,11 +32,11 @@ import org.bigbluebutton.deskshare.server.events.CaptureEndBlockEvent;
 import org.bigbluebutton.deskshare.server.events.CaptureStartBlockEvent;
 import org.bigbluebutton.deskshare.server.events.CaptureUpdateBlockEvent;
 import org.bigbluebutton.deskshare.server.events.MouseLocationEvent;
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BlockStreamProtocolDecoder extends CumulativeProtocolDecoder {
-	final private Logger log = Red5LoggerFactory.getLogger(BlockStreamProtocolDecoder.class, "deskshare");
+	final private Logger log = LoggerFactory.getLogger(BlockStreamProtocolDecoder.class);
 	
 	private static final String ROOM = "ROOM";
     private static final byte[] POLICY_REQUEST = new byte[] {'<','p','o','l','i','c','y','-','f','i','l','e','-','r','e','q','u','e','s','t','/','>',0};

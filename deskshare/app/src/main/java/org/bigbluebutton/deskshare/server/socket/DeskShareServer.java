@@ -25,12 +25,12 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class DeskShareServer {
-	final private Logger log = Red5LoggerFactory.getLogger(DeskShareServer.class, "deskshare");
+	final private Logger log = LoggerFactory.getLogger(DeskShareServer.class);
 	
     private int port = 1270;
 

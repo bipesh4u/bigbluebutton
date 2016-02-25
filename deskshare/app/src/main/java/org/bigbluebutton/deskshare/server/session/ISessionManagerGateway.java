@@ -20,6 +20,7 @@ package org.bigbluebutton.deskshare.server.session;
 
 import java.awt.Point;
 
+import akka.actor.ActorLogging;
 import org.bigbluebutton.deskshare.common.Dimension;
 
 /**
@@ -27,7 +28,7 @@ import org.bigbluebutton.deskshare.common.Dimension;
  * @author Richard Alam
  *
  */
-public interface ISessionManagerGateway {
+public interface ISessionManagerGateway extends ActorLogging {
 	public void createSession(String room, Dimension screenDim, Dimension blockDim, int seqNum, boolean useSVC2);
 
 	public void removeSession(String room, int seqNum);

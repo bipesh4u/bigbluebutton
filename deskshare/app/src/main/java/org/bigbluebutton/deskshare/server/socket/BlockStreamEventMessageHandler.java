@@ -27,11 +27,11 @@ import org.bigbluebutton.deskshare.server.events.CaptureEndBlockEvent;
 import org.bigbluebutton.deskshare.server.events.CaptureStartBlockEvent;
 import org.bigbluebutton.deskshare.server.events.CaptureUpdateBlockEvent;
 import org.bigbluebutton.deskshare.server.events.MouseLocationEvent;
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BlockStreamEventMessageHandler extends IoHandlerAdapter {
-	final private Logger log = Red5LoggerFactory.getLogger(BlockStreamEventMessageHandler.class, "deskshare");
+	final private Logger log = LoggerFactory.getLogger(BlockStreamEventMessageHandler.class);
 	
 	private ISessionManagerGateway sessionManager;
 	private static final String ROOM = "ROOM";

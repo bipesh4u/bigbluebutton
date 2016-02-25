@@ -27,22 +27,23 @@ import org.bigbluebutton.deskshare.server.RtmpClientAdapter
 import org.bigbluebutton.deskshare.server.stream.StreamManager
 import org.bigbluebutton.deskshare.server.socket.DeskShareServer
 import org.bigbluebutton.deskshare.server.MultiThreadedAppAdapter
-import akka.actor.{ActorSystem, Actor}
 import net.lag.configgy.Configgy
-import net.lag.logging.Logger
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import org.red5.server.api.scope.{IScope}
 import org.red5.server.util.ScopeUtils
 import com.google.gson.Gson
+import org.slf4j.LoggerFactory
 
-class DeskshareApplication(actorSystem: DeskshareActorSystem, streamManager: StreamManager, deskShareServer: DeskShareServer) extends MultiThreadedAppAdapter {
+
+class DeskshareApplication(actorSystem: DeskshareActorSystem, streamManager: StreamManager,
+													 deskShareServer: DeskShareServer) extends MultiThreadedAppAdapter {
 //	private val deathSwitch = new CountDownLatch(1)
 
 	// load our config file and configure logfiles.
 	Configgy.configure("webapps/deskshare/WEB-INF/deskshare.conf")
 
-	private val logger = Logger.get 
+	private val logger = LoggerFactory.getLogger(classOf[DeskshareApplication])
 	var appScope: IScope = null
  
 	override def appStart(app: IScope): Boolean = {

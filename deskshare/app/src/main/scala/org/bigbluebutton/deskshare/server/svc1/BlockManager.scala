@@ -22,10 +22,10 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.ConcurrentHashMap
 import org.bigbluebutton.deskshare.common.ScreenVideoEncoder
 import org.bigbluebutton.deskshare.server.session.ScreenVideoFrame
-import net.lag.logging.Logger
+import org.slf4j.LoggerFactory
 
 class BlockManager(room: String, screenDim: Dimension, blockDim: Dimension, waitForAllBlocks: Boolean, useSVC2: Boolean) extends BlockFactory {
-    private val log = Logger.get
+    private val log = LoggerFactory.getLogger(classOf[BlockManager])
     
 	private var blocksMap = new ConcurrentHashMap[Int, Block]
 	

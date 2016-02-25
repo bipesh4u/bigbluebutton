@@ -18,7 +18,7 @@
 */
 package org.bigbluebutton.deskshare.server.stream
 
-import akka.actor.{Props, ActorSystem, ActorLogging, Actor}
+import akka.actor.{ActorLogging, Props, Actor}
 import org.bigbluebutton.deskshare.server.red5.{DeskshareActorSystem, DeskshareApplication}
 import org.red5.server.api.scope.IScope
 import org.red5.server.api.so.ISharedObject
@@ -26,7 +26,6 @@ import org.red5.server.api.so.ISharedObject
 import scala.collection.mutable.HashMap
 import org.bigbluebutton.deskshare.server.recorder._
 
-//import net.lag.logging.Logger
 
 case class IsStreamPublishing(room: String)
 case class StreamPublishingReply(publishing: Boolean, width: Int, height: Int)

@@ -20,11 +20,15 @@ package org.bigbluebutton.deskshare.server.svc1
 
 import java.awt.Color;
 import java.util.Random
-import net.lag.logging.Logger
+
+import akka.event.Logging
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.bigbluebutton.deskshare.common.ScreenVideoEncoder
 
 class Block(val dim: Dimension, val position: Int) {
-	private val log = Logger.get
+  private val log = LoggerFactory.getLogger(classOf[Block])
 
 	var firstBlockReceived = false;
     val nextForceUpdate = 10000
@@ -60,7 +64,7 @@ class Block(val dim: Dimension, val position: Int) {
 	    encodedBlock = videoData;
 	    hasChanged = true;
       } else {
-		log.warning("Block[" + position + "[: Delayed sequence number [%s < %s]", seqNum, sequenceNumber)
+		log.warn("Block[" + position + "[: Delayed sequence number [%s < %s]", seqNum, sequenceNumber)
       }
     }
  

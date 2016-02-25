@@ -19,12 +19,11 @@
 package org.bigbluebutton.deskshare.server.recorder;
 
 import java.io.File;
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileRecordingServiceImp implements RecordingService {
-	final private Logger log = Red5LoggerFactory.getLogger(FileRecordingServiceImp.class, "deskshare");
-	
+	private static final Logger log = LoggerFactory.getLogger(FileRecordingServiceImp.class);
 	private String recordingDir;
 	private EventRecorder redisDispatcher;
 	

@@ -35,10 +35,10 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
         <listener-class>org.red5.logging.ContextLoggingListener</listener-class>
     </listener>
     
-    <filter>
-        <filter-name>LoggerContextFilter</filter-name>
-        <filter-class>org.red5.logging.LoggerContextFilter</filter-class>
-    </filter>
+    <!--<filter>-->
+        <!--<filter-name>LoggerContextFilter</filter-name>-->
+        <!--<filter-class>org.red5.logging.LoggerContextFilter</filter-class>-->
+    <!--</filter>-->
     
     <filter-mapping>
         <filter-name>LoggerContextFilter</filter-name>

@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.stream.IBroadcastStream;
@@ -45,12 +44,13 @@ import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.IStreamCodecInfo;
 import org.red5.codec.StreamCodecInfo;
 import org.slf4j.Logger;
-import org.red5.server.api.stream.IStreamPacket;;
+import org.red5.server.api.stream.IStreamPacket;
+import org.slf4j.LoggerFactory;;
 
 public class ScreenVideoBroadcastStream implements IBroadcastStream, IProvider, IPipeConnectionListener {
 	/** Listeners to get notified about received packets. */
 	private Set<IStreamListener> streamListeners = new CopyOnWriteArraySet<IStreamListener>();
-	final private Logger log = Red5LoggerFactory.getLogger(ScreenVideoBroadcastStream.class, "deskshare");
+	final private Logger log = LoggerFactory.getLogger(ScreenVideoBroadcastStream.class);
 
 	private String publishedStreamName;
 	private IPipe livePipe;

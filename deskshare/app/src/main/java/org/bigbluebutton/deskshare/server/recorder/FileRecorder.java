@@ -35,11 +35,11 @@ import org.bigbluebutton.deskshare.server.recorder.event.RecordUpdateEvent;
 import org.bigbluebutton.deskshare.server.session.FlvEncodeException;
 import org.bigbluebutton.deskshare.server.session.ScreenVideoFlvEncoder;
 import org.bigbluebutton.deskshare.server.util.StackTraceUtil;
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileRecorder implements Recorder {
-	final private Logger log = Red5LoggerFactory.getLogger(FileRecorder.class, "deskshare");
+	final private Logger log = LoggerFactory.getLogger(FileRecorder.class);
 	
 	private BlockingQueue<IoBuffer> screenQueue = new LinkedBlockingQueue<IoBuffer>();
 	private final Executor exec = Executors.newSingleThreadExecutor();
