@@ -19,11 +19,11 @@
 package org.bigbluebutton.deskshare.server.stream
 
 import java.awt.Point
-import akka.actor.{ActorLogging, Actor}
+import akka.actor.{ ActorLogging, Actor }
 import akka.actor.Actor._
 
 object StopStream
-object StartStream 
+object StartStream
 class UpdateStream(val room: String, val videoData: Array[Byte], val timestamp: Long)
 class UpdateStreamMouseLocation(val room: String, val loc: Point)
 

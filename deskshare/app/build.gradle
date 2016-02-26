@@ -127,9 +127,6 @@ dependencies {
   // Libraries for Akka
   compile 'com.typesafe.akka:akka-actor_2.11:2.4.2'
   compile 'com.typesafe.akka:akka-slf4j_2.11:2.4.2'
-
-  // Libraries needed for scala api
-  compile 'net.lag:configgy:2.0.0@jar'
     
   //redis
   compile 'redis.clients:jedis:1.5.1'

@@ -19,115 +19,116 @@
 package org.bigbluebutton.deskshare.server.stream
 
 import org.bigbluebutton.deskshare.server.recorder.Recorder
-import org.bigbluebutton.deskshare.server.red5.{DeskshareActorSystem, DeskshareApplication}
+import org.bigbluebutton.deskshare.server.red5.DeskshareApplication
 import org.bigbluebutton.deskshare.server.ScreenVideoBroadcastStream
 import org.bigbluebutton.deskshare.server.RtmpClientAdapter
 import org.red5.server.api.IContext
-import org.red5.server.api.scope.{IScope, IBroadcastScope}
+import org.red5.server.api.scope.{ IScope, IBroadcastScope }
 import org.red5.server.api.so.ISharedObject
 import org.red5.server.net.rtmp.event.VideoData
 import org.red5.server.stream.IProviderService
 import org.red5.server.net.rtmp.message.Constants
 import org.apache.mina.core.buffer.IoBuffer
 import java.util.ArrayList
-import akka.actor.{Props, ActorSystem, Actor}
+import akka.actor.{ Props, Actor }
 
-//object DeskshareStream {
-//  def props(system: ActorSystem,app: DeskshareApplication, name: String, width: Int,
-//						height: Int, record: Boolean, recorder: Recorder): Props = Props(classOf[DeskshareStream], system)
-//}
+object DeskshareStream {
+  def props(app: DeskshareApplication, name: String, width: Int,
+    height: Int, record: Boolean, recorder: Recorder): Props = Props(classOf[DeskshareStream],
+    app, name, width, height, record, recorder)
+}
 
 class DeskshareStream(app: DeskshareApplication, name: String, val width: Int,
-											val height: Int, record: Boolean, recorder: Recorder, actorSystem: DeskshareActorSystem) extends Stream {
-	private var broadcastStream:ScreenVideoBroadcastStream = null
-	private var dsClient:RtmpClientAdapter = null
-		
-	var startTimestamp: Long = System.currentTimeMillis()
- 
-	def receive = {
-		case StartStream => startStream()
-		case StopStream => stopStream()
-		case us: UpdateStream => updateStream(us)
-		case ml: UpdateStreamMouseLocation => updateStreamMouseLocation(ml)
-		case m:Any => log.warning("DeskshareStream: Unknown message " + m);
-	}
- 
-	def initializeStream():Boolean = {
-		app.createScreenVideoBroadcastStream(name) match {
-			case None => return false
-			case Some(bs) => {
-				broadcastStream = bs
-				app.createDeskshareClient(name) match {
-					case None => return false
-					case Some(dsc:RtmpClientAdapter) => {
-						dsClient = dsc
-						recorder.addListener(dsClient)
-						return true
-					}
-				}
-			}
-		}
-		return false
-	}
- 
-	private def stopStream() = {
-		log.debug("DeskShareStream: Stopping stream %s", name)
-		log.info("DeskShareStream: Sending deskshareStreamStopped for %s", name)
-		if (record) {
-			recorder.stop()
-		}
-		dsClient.sendDeskshareStreamStopped(new ArrayList[Object]())
-		broadcastStream.stop()
-		broadcastStream.close()
-		exit()
-	}
-	
-	private def startStream() = {
-	  log.debug("DeskShareStream: Starting stream %s", name)
-	  if (record) {
-	  	recorder.start()
-	  }
-		dsClient.sendDeskshareStreamStarted(width, height)
-	}
-	
-	private def updateStreamMouseLocation(ml: UpdateStreamMouseLocation) = {
-		dsClient.sendMouseLocation(ml.loc)
-	}
- 
-	private def updateStream(us: UpdateStream) {
-		val buffer: IoBuffer  = IoBuffer.allocate(us.videoData.length, false);
-		buffer.put(us.videoData);
-		
-		/* Set the marker back to zero position so that "gets" start from the beginning.
-		 * Otherwise, you get BufferUnderFlowException.
-		 */		
-		buffer.rewind();
-		
-		if (record) {
-			recorder.record(buffer)
-		}	
+    val height: Int, record: Boolean, recorder: Recorder) extends Stream {
+  private var broadcastStream: ScreenVideoBroadcastStream = null
+  private var dsClient: RtmpClientAdapter = null
 
-		val data: VideoData = new VideoData(buffer)
-		data.setSourceType(Constants.SOURCE_TYPE_LIVE);
-	    /*
+  var startTimestamp: Long = System.currentTimeMillis()
+
+  def receive = {
+    case StartStream => startStream()
+    case StopStream => stopStream()
+    case us: UpdateStream => updateStream(us)
+    case ml: UpdateStreamMouseLocation => updateStreamMouseLocation(ml)
+    case m: Any => log.warning("DeskshareStream: Unknown message " + m);
+  }
+
+  def initializeStream(): Boolean = {
+    app.createScreenVideoBroadcastStream(name) match {
+      case None => return false
+      case Some(bs) => {
+        broadcastStream = bs
+        app.createDeskshareClient(name) match {
+          case None => return false
+          case Some(dsc: RtmpClientAdapter) => {
+            dsClient = dsc
+            recorder.addListener(dsClient)
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }
+
+  private def stopStream() = {
+    log.debug("DeskShareStream: Stopping stream %s", name)
+    log.info("DeskShareStream: Sending deskshareStreamStopped for %s", name)
+    if (record) {
+      recorder.stop()
+    }
+    dsClient.sendDeskshareStreamStopped(new ArrayList[Object]())
+    broadcastStream.stop()
+    broadcastStream.close()
+    exit()
+  }
+
+  private def startStream() = {
+    log.debug("DeskShareStream: Starting stream %s", name)
+    if (record) {
+      recorder.start()
+    }
+    dsClient.sendDeskshareStreamStarted(width, height)
+  }
+
+  private def updateStreamMouseLocation(ml: UpdateStreamMouseLocation) = {
+    dsClient.sendMouseLocation(ml.loc)
+  }
+
+  private def updateStream(us: UpdateStream) {
+    val buffer: IoBuffer = IoBuffer.allocate(us.videoData.length, false);
+    buffer.put(us.videoData);
+
+    /* Set the marker back to zero position so that "gets" start from the beginning.
+		 * Otherwise, you get BufferUnderFlowException.
+		 */
+    buffer.rewind();
+
+    if (record) {
+      recorder.record(buffer)
+    }
+
+    val data: VideoData = new VideoData(buffer)
+    data.setSourceType(Constants.SOURCE_TYPE_LIVE);
+    /*
 	     * Use timestamp increments. This will force
 	     * Flash Player to playback at proper timestamp. If we calculate timestamp using
 	     * System.currentTimeMillis() - startTimestamp, the video has tendency to drift and
 	     * introduce delay. See how we do the voice. (ralam may 10, 2012)
 	     */
-        data.setTimestamp(us.timestamp.toInt);
-		broadcastStream.dispatchEvent(data)
-		data.release()
-		
-	}
- 
-	def  exit() : Unit = {
-	  log.warning("DeskShareStream: **** Exiting  Actor for room %s", name)
-		context.stop(self)
-	}
+    data.setTimestamp(us.timestamp.toInt);
+    broadcastStream.dispatchEvent(data)
+    data.release()
 
-	def exit(reason : AnyRef) : Unit = {
-	  log.warning("DeskShareStream: **** Exiting Actor %s for room %s", reason, name)
-		context.stop(self)
-	}
+  }
+
+  def exit(): Unit = {
+    log.warning("DeskShareStream: **** Exiting  Actor for room %s", name)
+    context.stop(self)
+  }
+
+  def exit(reason: AnyRef): Unit = {
+    log.warning("DeskShareStream: **** Exiting Actor %s for room %s", reason, name)
+    context.stop(self)
+  }
 }
