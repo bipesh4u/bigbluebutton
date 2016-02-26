@@ -19,6 +19,7 @@
 package org.bigbluebutton.deskshare.server.stream
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import org.bigbluebutton.deskshare.Boot
 import org.bigbluebutton.deskshare.server.stream.StreamManager.{ StreamPublishingReply, IsStreamPublishing }
 import org.slf4j.LoggerFactory
 import akka.pattern.ask
@@ -29,8 +30,8 @@ import org.bigbluebutton.deskshare.server.sessions.SessionManagerGateway
 import org.red5.server.api.Red5
 import java.util.HashMap
 
-class DeskshareService(actorSystem: ActorSystem, streamManager: ActorRef, sessionGateway: SessionManagerGateway) {
-  implicit def executionContext = actorSystem.dispatcher
+class DeskshareService(boot: Boot) {
+  implicit def executionContext = boot.system.dispatcher
   private val log = LoggerFactory.getLogger(classOf[DeskshareService])
 
   def checkIfStreamIsPublishing(room: String): HashMap[String, Any] = {
@@ -40,7 +41,7 @@ class DeskshareService(actorSystem: ActorSystem, streamManager: ActorRef, sessio
     var width = 0
     var height = 0
 
-    val future = streamManager.ask(IsStreamPublishing(room))(3.seconds)
+    val future = boot.streamManager.ask(IsStreamPublishing(room))(3.seconds)
     future onComplete {
       case Success(rep) => {
         val reply = rep.asInstanceOf[StreamPublishingReply]
@@ -65,11 +66,11 @@ class DeskshareService(actorSystem: ActorSystem, streamManager: ActorRef, sessio
 
   def startedToViewStream(stream: String): Unit = {
     log.debug("DeskshareService: Started viewing stream for room %s", stream)
-    sessionGateway.sendKeyFrame(stream)
+    boot.sessionGateway.sendKeyFrame(stream)
   }
 
   def stopSharingDesktop(meetingId: String) {
     log.debug("DeskshareService: Stop sharing for meeting [%s]", meetingId)
-    sessionGateway.stopSharingDesktop(meetingId, meetingId)
+    boot.sessionGateway.stopSharingDesktop(meetingId, meetingId)
   }
 }

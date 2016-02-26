@@ -37,8 +37,12 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     <property name="virtualHosts" value="${webapp.virtualHosts}"/>
   </bean>
   <bean id="web.handler" class="org.bigbluebutton.deskshare.server.red5.DeskshareApplication">
+    <constructor-arg ref="boot"/>
   </bean>
   <bean id="deskshare.service" class="org.bigbluebutton.deskshare.server.stream.DeskshareService">
+    <constructor-arg ref="boot"/>
+  </bean>
+  <bean id="boot" class="org.bigbluebutton.deskshare.Boot">
   </bean>
 
 </beans>

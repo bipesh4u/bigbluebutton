@@ -1,4 +1,5 @@
 enablePlugins(JavaServerAppPackaging)
+enablePlugins(JettyPlugin)
 
 name := "bbb-deskshare-akka"
 

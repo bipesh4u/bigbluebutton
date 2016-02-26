@@ -28,21 +28,24 @@ import scala.collection.mutable.HashMap
 import org.bigbluebutton.deskshare.server.recorder._
 
 object StreamManager {
-  def props(actorSystem: ActorSystem, app: DeskshareApplication, record: Boolean, recordingService: RecordingService): Props =
-    Props(classOf[StreamManager], actorSystem, app, record, recordingService)
+  def props(actorSystem: ActorSystem, record: Boolean, recordingService: RecordingService): Props =
+    Props(classOf[StreamManager], actorSystem, record, recordingService)
 
   case class IsStreamPublishing(room: String)
   case class StreamPublishingReply(publishing: Boolean, width: Int, height: Int)
   case class CreateStream(room: String, width: Int, height: Int)
   case class DestroyStream(room: String)
+  case class SetApplication(app: DeskshareApplication)
   private case class AddStream(room: String, stream: DeskshareStream)
   private case class RemoveStream(room: String)
 
 }
 
-class StreamManager(val actorSystem: ActorSystem, val app: DeskshareApplication, val record: Boolean, val recordingService: RecordingService) extends Actor with ActorLogging {
+class StreamManager(val actorSystem: ActorSystem, val record: Boolean, val recordingService: RecordingService) extends Actor with ActorLogging {
 
-  val actorRef = context.actorOf(StreamManager.props(actorSystem, app, record, recordingService), "stream-manager-actor")
+  val actorRef = context.actorOf(StreamManager.props(actorSystem, record, recordingService), "stream-manager-actor")
+  var deskshareApplication: DeskshareApplication = null
+
   println("StreamManager in class")
 
   private val streams = new HashMap[String, DeskshareStream]
@@ -65,13 +68,17 @@ class StreamManager(val actorSystem: ActorSystem, val app: DeskshareApplication,
     }
     case msg: CreateStream => createStream(msg.room, msg.width, msg.height)
     case msg: DestroyStream => destroyStream(msg.room)
+    case msg: SetApplication => setDeskshareApplication(msg.app)
     case m: Any => log.warning("StreamManager: StreamManager received unknown message: %s", m)
   }
 
+  def setDeskshareApplication(application: DeskshareApplication) = {
+    deskshareApplication = application
+  }
   def createStream(room: String, width: Int, height: Int): Option[DeskshareStream] = {
     try {
       log.debug("StreamManager: Creating stream for [ %s ]", room)
-      val stream = new DeskshareStream(app, room, width, height, record, recordingService.getRecorderFor(room))
+      val stream = new DeskshareStream(deskshareApplication, room, width, height, record, recordingService.getRecorderFor(room))
       log.debug("StreamManager: Initializing stream for [ %s ]", room)
       if (stream.initializeStream) {
         log.debug("StreamManager: Starting stream for [ %s ]", room)

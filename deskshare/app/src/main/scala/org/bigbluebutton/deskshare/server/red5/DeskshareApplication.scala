@@ -19,6 +19,11 @@
 package org.bigbluebutton.deskshare.server.red5
 
 import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
+import org.bigbluebutton.deskshare.Boot
+import org.bigbluebutton.deskshare.server.recorder.{ FileRecordingServiceImp, EventRecorder }
+import org.bigbluebutton.deskshare.server.sessions.SessionManagerGateway
+import org.bigbluebutton.deskshare.server.stream.StreamManager.SetApplication
 import org.red5.server.api.{ IContext, IConnection }
 import org.red5.server.so.SharedObjectService
 import org.red5.server.api.so.{ ISharedObject, ISharedObjectService }
@@ -26,7 +31,7 @@ import org.red5.server.stream.IProviderService
 import org.bigbluebutton.deskshare.server.ScreenVideoBroadcastStream
 import org.bigbluebutton.deskshare.server.RtmpClientAdapter
 import org.bigbluebutton.deskshare.server.stream.StreamManager
-import org.bigbluebutton.deskshare.server.socket.DeskShareServer
+import org.bigbluebutton.deskshare.server.socket.{ BlockStreamEventMessageHandler, DeskShareServer }
 import org.bigbluebutton.deskshare.server.MultiThreadedAppAdapter
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -35,10 +40,13 @@ import org.red5.server.util.ScopeUtils
 import com.google.gson.Gson
 import org.slf4j.LoggerFactory
 
-class DeskshareApplication(actorSystem: ActorSystem, deskShareServer: DeskShareServer) extends MultiThreadedAppAdapter {
+import scala.util.Try
+
+class DeskshareApplication(boot: Boot) extends MultiThreadedAppAdapter {
   //	private val deathSwitch = new CountDownLatch(1)
 
   private val logger = LoggerFactory.getLogger(classOf[DeskshareApplication])
+  var deskShareServer: DeskShareServer = null
   var appScope: IScope = null
 
   override def appStart(app: IScope): Boolean = {
@@ -49,14 +57,43 @@ class DeskshareApplication(actorSystem: ActorSystem, deskShareServer: DeskShareS
     else println("APPSCOPE is NOT NULL!!!!")
 
     // TODO CALL BOOT
-    val a = new org.bigbluebutton.deskshare.Boot()
+    // val a = new org.bigbluebutton.deskshare.Boot()
 
     // make sure there's always one actor running so scala 2.7.2 doesn't kill off the actors library.
     //		actor {
     //			deathSwitch.await
     //		}
 
-    deskShareServer.start();
+    val config = ConfigFactory.load()
+
+    lazy val recordingDirectory = Try(config.getString("recordingDirectory")).getOrElse("/var/bigbluebutton/deskshare")
+    lazy val redisHost = Try(config.getString("redis.host")).getOrElse("127.0.0.1")
+    lazy val redisPort = Try(config.getInt("redis.port")).getOrElse(6379)
+    lazy val redisKeyExpiry = Try(config.getInt("redis.keyExpiry")).getOrElse(1209600)
+
+    lazy val keyFrameInterval = Try(config.getInt("keyFrameInterval")).getOrElse(5000)
+    lazy val interframeInterval = Try(config.getInt("interframeInterval")).getOrElse(200)
+    lazy val waitForAllBlocks = Try(config.getBoolean("waitForAllBlocks")).getOrElse(false)
+
+    //    implicit val system = ActorSystem("bigbluebutton-deskshare-system")
+
+    val redisRecorder = new EventRecorder(redisHost, redisPort, redisKeyExpiry)
+    val recordingService = new FileRecordingServiceImp()
+    recordingService.setRedisDispatcher(redisRecorder)
+    recordingService.setRecordingDirectory(recordingDirectory)
+
+    //    implicit val streamManager = system.actorOf(StreamManager.props(system, true, recordingService), "streamManager")
+    boot.streamManager ! SetApplication(this)
+
+    //    val sessionGateway = new SessionManagerGateway(boot.system, boot.streamManager, keyFrameInterval, interframeInterval, waitForAllBlocks)
+
+    val screenCaptureHandler = new BlockStreamEventMessageHandler()
+    screenCaptureHandler.setSessionManagerGateway(boot.sessionGateway)
+    deskShareServer = new DeskShareServer()
+    deskShareServer.setScreenCaptureHandler(screenCaptureHandler)
+    deskShareServer.setPort(redisPort)
+    deskShareServer.start()
+
     super.appStart(app)
   }
 
