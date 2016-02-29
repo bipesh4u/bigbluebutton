@@ -19,6 +19,20 @@ Meteor.methods
     if authToken? and userId? and meetingId?
       createDummyUser meetingId, userId, authToken
       publish Meteor.config.redis.channels.toBBBApps.meeting, message
+
+
+      # TEMP TODO move this where it belongs
+      turnRequest =
+        header:
+          name: "send_stun_turn_info_request_message"
+        payload:
+          meeting_id: meetingId
+          requester_id: userId
+      publish Meteor.config.redis.channels.fromBBBAppsUsers, turnRequest
+
+
+
+
     else
       Meteor.log.info "did not have enough information to send a validate_auth_token message"
 
@@ -36,6 +50,7 @@ class Meteor.RedisPubSub
     @subClient.on "pmessage", Meteor.bindEnvironment(@_addToQueue)
 
     @subClient.psubscribe(Meteor.config.redis.channels.fromBBBApps)
+    @subClient.psubscribe(Meteor.config.redis.channels.toBBBHtml5)
 
     callback @
 
