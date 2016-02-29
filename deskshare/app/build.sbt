@@ -41,16 +41,24 @@ libraryDependencies ++= {
   Seq(
     "com.typesafe.akka"        %%  "akka-actor"        % akkaVersion,
     "com.typesafe.akka"        %%  "akka-testkit"      % akkaVersion    % "test",
-    "com.typesafe.akka" 	     %%  "akka-slf4j"        % akkaVersion,
-//    "ch.qos.logback"    	      %  "logback-classic"   % "1.0.13" % "runtime",
-    "org.pegdown" 		      %  "pegdown"           % "1.4.0",
-    "junit" 				      %  "junit"             % "4.11",
+    "com.typesafe.akka"        %%  "akka-slf4j"        % akkaVersion,
+    "ch.qos.logback"            %  "logback-classic"   % "1.0.13" % "runtime",
+    "org.pegdown"               %  "pegdown"           % "1.4.0",
+    "junit"                     %  "junit"             % "4.11",
     "com.etaty.rediscala"      %%  "rediscala"         % "1.4.0",
     "commons-codec"             %  "commons-codec"     % "1.8",
-//    "joda-time"                 %  "joda-time"         % "2.3",
-//    "com.google.code.gson"      %  "gson"              % "1.7.1",
     "redis.clients"             %  "jedis"             % "2.7.2",
-    "org.apache.commons"        %  "commons-lang3"     % "3.2"
+    "org.apache.commons"        %  "commons-lang3"     % "3.2",
+    "org.red5"                  %  "red5-server"       % "1.0.6-RELEASE",
+    "com.google.code.gson"      %  "gson"              % "1.7.1",
+    "org.springframework"       %  "spring-web"        % "4.1.7.RELEASE",
+    "org.springframework"       %  "spring-beans"      % "4.1.7.RELEASE",
+    "org.springframework"       %  "spring-context"    % "4.1.7.RELEASE",
+    "org.springframework"       %  "spring-core"       % "4.1.7.RELEASE",
+    "org.springframework"       %  "spring-webmvc"     % "4.1.7.RELEASE",
+    "org.springframework"       %  "spring-aop"        % "4.1.7.RELEASE"
+
+
   )}
 
 seq(Revolver.settings: _*)
@@ -85,14 +93,14 @@ daemonGroup in Linux := group
 
 mappings in Universal <+= (packageBin in Compile, sourceDirectory ) map { (_, src) =>
   // Move the application.conf so the user can override settings here
-  val appConf = src / "main" / "resources" / "application.conf"
+  val appConf = src / "main" / "webapp" / "WEB-INF" / "deskshare.conf"
   appConf -> "conf/application.conf"
 }
 
 mappings in Universal <+= (packageBin in Compile, sourceDirectory ) map { (_, src) =>
   // Move logback.xml so the user can override settings here
-  val logConf = src / "main" / "resources" / "logback.xml"
-  logConf -> "conf/logback.xml"
+  val logConf = src / "main" / "resources" / "logback-deskshare.xml"
+  logConf -> "conf/logback-deskshare.xml"
 }
 
 debianPackageDependencies in Debian ++= Seq("java8-runtime-headless", "bash") //TODO I put 8 instead of 7 here
