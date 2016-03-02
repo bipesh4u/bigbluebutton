@@ -52,17 +52,17 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
     </listener-->
 
 
-    <servlet>
-        <servlet-name>tunnel</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <!--<servlet>-->
+        <!--<servlet-name>tunnel</servlet-name>-->
+        <!--<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>-->
+        <!--<load-on-startup>1</load-on-startup>-->
+    <!--</servlet>-->
 
     <!-- maps the sample dispatcher to *.form -->
-    <servlet-mapping>
-        <servlet-name>tunnel</servlet-name>
-        <url-pattern>/tunnel/*</url-pattern>
-    </servlet-mapping>
+    <!--<servlet-mapping>-->
+        <!--<servlet-name>tunnel</servlet-name>-->
+        <!--<url-pattern>/tunnel/*</url-pattern>-->
+    <!--</servlet-mapping>-->
 	    
     <security-constraint>
         <web-resource-collection>
