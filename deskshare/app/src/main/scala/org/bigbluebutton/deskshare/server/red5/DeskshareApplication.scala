@@ -21,36 +21,51 @@ package org.bigbluebutton.deskshare.server.red5
 import org.red5.server.adapter.MultiThreadedApplicationAdapter
 import org.red5.server.api.{ IContext, IConnection }
 import org.red5.server.api.scope.{ IScope }
-import org.red5.logging.Red5LoggerFactory
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 
+import scala.util.{Failure, Success, Try}
+
 class DeskshareApplication extends MultiThreadedApplicationAdapter {
 
-  private val logger = Red5LoggerFactory.getLogger(classOf[DeskshareApplication])
+//  private val logger = Red5LoggerFactory.getLogger(classOf[DeskshareApplication], "deskshare")
 
-  def printlog(string: String):Unit = {
 
-    println("\n\n "+ string + " println\n\n")
-    logger.info("\n\n "+ string + "  info\n\n")
-    logger.error("\n\n  "+ string + " error\n\n")
-  }
+//  lazy val logger = Red5LoggerFactory.getLogger(this.getClass, "deskshare")
+
+//  val config = ConfigFactory.load()
 
 //  var appScope: IScope = null
 
-  override def appStart(app: IScope): Boolean = {
-    printlog("deskShare appStart 2")
+  def printlog(string: String):Unit = {
 
-    val config = ConfigFactory.load()
-    implicit val system = ActorSystem("bigbluebutton-deskshare-system", config)
-    val a = system.actorOf(SampleActor.props(system, true))
+//    println("\n\n "+ string + " println\n\n")
+//    logger.info("\n\n "+ string + "  info\n\n")
+//    logger.error("\n\n  "+ string + " error\n\n")
+//    logRed5.debug("RED5 log debugGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+  }
+  override def appStart(app: IScope): Boolean = {
+
+//    lazy val redisHost = Try(config.getString("redis.host")).getOrElse("127.iWRONGGGGG0.0.1")
+//    lazy val redisPort = Try(config.getInt("redis.port")).getOrElse(6379)
+//    lazy val redisPassword = Try(config.getString("redis.password")).getOrElse("")
+//    lazy val keysExpiresInSec = Try(config.getInt("redis.keyExpiry")).getOrElse(14 * 86400) // 14 days
+//
+//    println("\n\n\n\n redis host=" + redisHost)
+
+    implicit val system = ActorSystem("bigbluebutton-deskshare-system")
+    implicit def executionContext = system.dispatcher
+
+    val a = system.actorOf(SampleActor.props(system, true), "my-first-actor")
     a ! "hey"
 
+    import scala.concurrent.duration._
+    system.scheduler.schedule(
+    (5.seconds),
+    (5.seconds),
+    a,
+    "eee")
     printlog("deskShare appStart after")
-    //    appScope = app
-//    super.setScope(appScope)
-//    if (appScope == null) printlog("APSCOPE IS NULL!!!!")
-//    else printlog("APPSCOPE is NOT NULL!!!!")
     super.appStart(app)
   }
 

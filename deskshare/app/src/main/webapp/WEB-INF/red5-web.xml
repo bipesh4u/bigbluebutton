@@ -38,7 +38,5 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
   </bean>
   <bean id="web.handler" class="org.bigbluebutton.deskshare.server.red5.DeskshareApplication">
   </bean>
-  <bean id="deskshare.service" class="org.bigbluebutton.deskshare.server.stream.DeskshareService">
-  </bean>
 
 </beans>
