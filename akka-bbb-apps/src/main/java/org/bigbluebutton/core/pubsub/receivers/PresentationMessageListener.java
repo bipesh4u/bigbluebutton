@@ -138,44 +138,46 @@ public class PresentationMessageListener implements MessageHandler {
     				}
     			}
     			else {
-    				Gson gson = new Gson();
-    				HashMap<String,String> map = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());
-    				String code = (String) map.get("returnCode");
-    				String presId = (String) map.get("presentationId");
-    				String filename = (String) map.get("filename");
-    				String conference = (String) map.get("conference");
-    				String messageKey = (String) map.get("messageKey");
+                    Gson gson = new Gson();
+                    HashMap<String,String> map = gson.fromJson(message, new TypeToken<Map<String, String>>() {}.getType());
+                    if(map.containsKey("messageKey")){
+                        String code = (String) map.get("returnCode");
+                        String presId = (String) map.get("presentationId");
+                        String filename = (String) map.get("filename");
+                        String conference = (String) map.get("conference");
+                        String messageKey = (String) map.get("messageKey");
 
-    				if (messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_SUCCESS_KEY) ||
-    						messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_FAILED_KEY) ||
-    						messageKey.equalsIgnoreCase(SUPPORTED_DOCUMENT_KEY) ||
-    						messageKey.equalsIgnoreCase(UNSUPPORTED_DOCUMENT_KEY) ||
-    						messageKey.equalsIgnoreCase(GENERATING_THUMBNAIL_KEY) ||
-    						messageKey.equalsIgnoreCase(GENERATED_THUMBNAIL_KEY) ||
-    						messageKey.equalsIgnoreCase(PAGE_COUNT_FAILED_KEY)){
+                        if (messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_SUCCESS_KEY) ||
+                                messageKey.equalsIgnoreCase(OFFICE_DOC_CONVERSION_FAILED_KEY) ||
+                                messageKey.equalsIgnoreCase(SUPPORTED_DOCUMENT_KEY) ||
+                                messageKey.equalsIgnoreCase(UNSUPPORTED_DOCUMENT_KEY) ||
+                                messageKey.equalsIgnoreCase(GENERATING_THUMBNAIL_KEY) ||
+                                messageKey.equalsIgnoreCase(GENERATED_THUMBNAIL_KEY) ||
+                                messageKey.equalsIgnoreCase(PAGE_COUNT_FAILED_KEY)){
 
-    					sendConversionUpdate(messageKey, conference, code, presId, filename);
-    				} else if(messageKey.equalsIgnoreCase(PAGE_COUNT_EXCEEDED_KEY)){
+                            sendConversionUpdate(messageKey, conference, code, presId, filename);
+                        } else if(messageKey.equalsIgnoreCase(PAGE_COUNT_EXCEEDED_KEY)){
 
-    					Integer numberOfPages = new Integer((String) map.get("numberOfPages"));
-    					Integer maxNumberPages = new Integer((String) map.get("maxNumberPages"));
-    					sendPageCountError(messageKey, conference, code,
-    							presId, numberOfPages, maxNumberPages, filename);
+                            Integer numberOfPages = new Integer((String) map.get("numberOfPages"));
+                            Integer maxNumberPages = new Integer((String) map.get("maxNumberPages"));
+                            sendPageCountError(messageKey, conference, code,
+                                    presId, numberOfPages, maxNumberPages, filename);
 
-    				} else if(messageKey.equalsIgnoreCase(GENERATED_SLIDE_KEY)){
-    					Integer numberOfPages = new Integer((String) map.get("numberOfPages"));
-    					Integer pagesCompleted = new Integer((String) map.get("pagesCompleted"));
+                        } else if(messageKey.equalsIgnoreCase(GENERATED_SLIDE_KEY)){
+                            Integer numberOfPages = new Integer((String) map.get("numberOfPages"));
+                            Integer pagesCompleted = new Integer((String) map.get("pagesCompleted"));
 
-    					sendSlideGenerated(messageKey, conference, code,
-    							presId, numberOfPages, pagesCompleted, filename);
+                            sendSlideGenerated(messageKey, conference, code,
+                                    presId, numberOfPages, pagesCompleted, filename);
 
-    				} else if(messageKey.equalsIgnoreCase(CONVERSION_COMPLETED_KEY)){
-    					Integer numberOfPages = new Integer((String) map.get("numberOfPages"));
-    					String presBaseUrl = (String) map.get("presentationBaseUrl");
+                        } else if(messageKey.equalsIgnoreCase(CONVERSION_COMPLETED_KEY)){
+                            Integer numberOfPages = new Integer((String) map.get("numberOfPages"));
+                            String presBaseUrl = (String) map.get("presentationBaseUrl");
 
-    					sendConversionCompleted(messageKey, conference, code,
-    							presId, numberOfPages, filename, presBaseUrl);
-    				}
+                            sendConversionCompleted(messageKey, conference, code,
+                                    presId, numberOfPages, filename, presBaseUrl);
+                        }
+                    }
     			}
     		}
     	}
