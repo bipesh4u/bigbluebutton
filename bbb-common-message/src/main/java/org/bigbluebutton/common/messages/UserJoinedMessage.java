@@ -21,6 +21,7 @@ public class UserJoinedMessage implements ISubscribedMessage {
 	public String toJson() {
 		HashMap<String, Object> payload = new HashMap<String, Object>();
 		payload.put(Constants.MEETING_ID, meetingId);
+		payload.put(Constants.USER, user);
 
 		java.util.HashMap<String, Object> header = MessageBuilder.buildHeader(USER_JOINED, VERSION, null);
 
@@ -57,3 +58,4 @@ public class UserJoinedMessage implements ISubscribedMessage {
 		return null;
 	}
 }
+
