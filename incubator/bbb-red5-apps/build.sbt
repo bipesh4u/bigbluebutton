@@ -32,17 +32,24 @@ publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/d
 // into eclipse.
 retrieveManaged := true
 
+testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "html", "console", "junitxml")
+
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/scalatest-reports")
+
 libraryDependencies ++= {
   val akkaVersion  = "2.4.2"
   val springVersion = "4.2.5.RELEASE"
   val minaVersion = "2.0.13"
   val slf4jVersion = "1.7.21"
   val red5Version = "1.0.7-M10"
+  val scalaTestV  = "2.2.4"
   Seq(
     "com.typesafe.akka"        %%  "akka-actor"            % akkaVersion,
     "com.typesafe.akka"        %%  "akka-testkit"          % akkaVersion    % "test",
     "com.typesafe.akka"        %%  "akka-slf4j"            % akkaVersion,
     "com.typesafe"              %  "config"                % "1.3.0",
+    "org.scalatest"            %   "scalatest_2.11"        % scalaTestV     % "test",
+    "org.pegdown"              %   "pegdown"               % "1.4.0",
 
     // Servlet
     "javax.servlet"             %  "servlet-api"           % "2.5",
