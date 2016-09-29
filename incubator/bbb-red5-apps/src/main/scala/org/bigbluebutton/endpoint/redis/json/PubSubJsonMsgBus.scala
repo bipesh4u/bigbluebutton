@@ -3,8 +3,8 @@ package org.bigbluebutton.endpoint.redis.json
 import akka.actor.ActorRef
 import akka.event.{ EventBus, LookupClassification }
 
-case class ReceivedJsonMessage(name: String, data: String);
-case class IncomingJsonMessage(val topic: String, val payload: ReceivedJsonMessage)
+case class ReceivedJsonMessage(name: String, data: String)
+case class IncomingJsonMessage(topic: String, payload: ReceivedJsonMessage)
 
 class PubSubJsonMsgBus extends EventBus with LookupClassification {
   type Event = IncomingJsonMessage

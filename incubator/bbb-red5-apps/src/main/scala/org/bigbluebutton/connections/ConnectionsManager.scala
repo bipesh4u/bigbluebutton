@@ -41,14 +41,14 @@ RedisPublisher) extends Actor with ActorLogging {
     case msg: Any => log.warning("Unknown message " + msg)
   }
 
-
   private def handleClientConnected(msg: FromClientMsg): Unit = {
-    log.info(s"Client connected sToken=${msg.sessionToken} connId=${msg.connectionId}")
+    log.info(s"Client connected sessionToken=${msg.sessionToken} connId=${msg.connectionId}")
 
     connections.get(msg.sessionToken) match {
       case None => {
         if (log.isDebugEnabled) {
-          log.debug(s"First encounter of connId=${msg.connectionId} for sToken=${msg.sessionToken}")
+          log.debug(s"First encounter of connId=${msg.connectionId} for sessionToken=${msg
+            .sessionToken}")
         }
 
         val newConnection = system.actorOf(Connection.props(bus, redisPublisher, msg
@@ -56,19 +56,19 @@ RedisPublisher) extends Actor with ActorLogging {
         connections += msg.sessionToken -> newConnection
 
         newConnection ! msg
-
       }
       case Some(conn) => {
         if (log.isDebugEnabled) {
-          log.debug(s"Connection connId=${msg.connectionId} for sToken=${msg.sessionToken} already exists")
+          log.debug(s"Connection connId=${msg.connectionId} for sessionToken=${msg.sessionToken} " +
+            s"already exists")
         }
         conn ! msg
       }
     }
   }
 
-  private def handleClientDisconnected(msg: FromClientMsg) {
-    log.info(s"Client disconnected sToken=${msg.sessionToken} connId=${msg.connectionId}")
+  private def handleClientDisconnected(msg: FromClientMsg): Unit = {
+    log.info(s"Client disconnected sessionToken=${msg.sessionToken} connId=${msg.connectionId}")
 
     connections.get(msg.sessionToken) foreach { connection =>
       connection forward msg
