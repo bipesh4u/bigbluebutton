@@ -4,22 +4,21 @@ import akka.actor.{Actor, ActorLogging, Props}
 import com.google.gson.{Gson, JsonObject, JsonParser}
 import org.bigbluebutton.bus.{FromClientMsg, Red5AppsMsgBus}
 import org.bigbluebutton.common.messages.MessagingConstants
+import org.bigbluebutton.connections.Connection.UpdateMsg
 import org.bigbluebutton.endpoint.redis.RedisPublisher
 
 object Connection {
   def props(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher, sessionToken: String,
-            connectionId: String): Props =
-    Props(classOf[Connection], bus, redisPublisher, sessionToken, connectionId)
+            connectionId: String, state: ConnectionStateModel = new ConnectionStateModel): Props =
+    Props(classOf[Connection], bus, redisPublisher, sessionToken, connectionId, state)
+
+  case class UpdateMsg(a: Long)
 }
 
 
 class Connection(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher , sessionToken: String,
-                 connectionId: String) extends Actor with ActorLogging {
-  log.warning(s"Creating a new Connection: sessionToken=$sessionToken connectionId=$connectionId")
-
-  var connectionTime: Long = 0L
-  var disconnectionTime: Long = 0L
-
+                 connectionId: String, state: ConnectionStateModel) extends Actor with ActorLogging {
+  log.warning(s"Creating a new Connection: sessionToken=$sessionToken connectionId=$connectionId connectionTime=${state.getConnectionTime}")
 
   override def preStart(): Unit = {
     bus.subscribe(self, sessionToken)
@@ -56,12 +55,13 @@ class Connection(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher , sessionTo
 
   private def handleClientConnected(msg: FromClientMsg): Unit = {
     log.info(s"_____handleClientConnected___${msg.sessionToken}  ${msg.connectionId}")
-    connectionTime = genTimestamp()
+    state.setConnectionTime(genTimestamp())
+    sender ! UpdateMsg(state.getConnectionTime)
   }
 
   private def handleClientDisconnected(msg: FromClientMsg): Unit = {
     log.info(s"_____handleClientDisconnected___${msg.sessionToken}  ${msg.connectionId}")
-    disconnectionTime = genTimestamp()
+    state.setDisconnectionTime(genTimestamp())
   }
 
   private def handleTransitMessage(msg: FromClientMsg): Unit = {
