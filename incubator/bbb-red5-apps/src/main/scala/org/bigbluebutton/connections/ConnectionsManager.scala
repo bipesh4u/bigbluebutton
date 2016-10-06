@@ -1,29 +1,29 @@
 package org.bigbluebutton.connections
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
-import org.bigbluebutton.bus.{FromClientMsg, Red5AppsMsgBus}
-import org.bigbluebutton.endpoint.redis.RedisPublisher
+import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5AppsMsgBus}
 
 import scala.collection.mutable
 
 object ConnectionsManager {
-  def props(system: ActorSystem, bus: Red5AppsMsgBus, redisPublisher: RedisPublisher): Props =
-    Props(classOf[ConnectionsManager], system, bus, redisPublisher)
+  def props(system: ActorSystem, red5AppsMsgBus: Red5AppsMsgBus, pubSubMessageBus:
+  PubSubMessageBus): Props = Props(classOf[ConnectionsManager], system, red5AppsMsgBus,
+    pubSubMessageBus)
 }
 
-class ConnectionsManager(system: ActorSystem, bus: Red5AppsMsgBus, redisPublisher:
-RedisPublisher) extends Actor with ActorLogging {
+class ConnectionsManager(system: ActorSystem, red5AppsMsgBus: Red5AppsMsgBus, pubSubMessageBus:
+PubSubMessageBus) extends Actor with ActorLogging {
   log.warning("Creating a new ConnectionsManager warn")
 
   val actorName = "connection-manager-actor"
 
   override def preStart(): Unit = {
-    bus.subscribe(self, actorName)
+    red5AppsMsgBus.subscribe(self, actorName)
     super.preStart()
   }
 
   override def postStop(): Unit = {
-    bus.unsubscribe(self, actorName)
+    red5AppsMsgBus.unsubscribe(self, actorName)
     super.postStop()
   }
 
@@ -35,7 +35,9 @@ RedisPublisher) extends Actor with ActorLogging {
         case "ClientConnected"      => handleClientConnected(msg)
         case "ClientDisconnected"   => handleClientDisconnected(msg)
 
-        case _                      => handleTransitMessage(msg)
+        // case _                      => handleTransitMessage(msg) // TODO - Most likely have to
+        // remove this as keeping it means the Connection actor (already subscribed in the
+        // messagebus) will receive the message twice
       }
     }
     case msg: Any => log.warning("Unknown message " + msg)
@@ -51,7 +53,7 @@ RedisPublisher) extends Actor with ActorLogging {
             .sessionToken}")
         }
 
-        val newConnection = system.actorOf(Connection.props(bus, redisPublisher, msg
+        val newConnection = system.actorOf(Connection.props(red5AppsMsgBus, pubSubMessageBus, msg
           .sessionToken, msg.connectionId), msg.sessionToken)
         connections += msg.sessionToken -> newConnection
 

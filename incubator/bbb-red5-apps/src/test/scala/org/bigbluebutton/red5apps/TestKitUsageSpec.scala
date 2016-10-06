@@ -1,4 +1,4 @@
-package org.bigbluebutton
+package org.bigbluebutton.red5apps
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}

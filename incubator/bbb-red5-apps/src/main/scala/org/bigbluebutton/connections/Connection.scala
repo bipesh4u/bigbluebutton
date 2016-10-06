@@ -2,31 +2,31 @@ package org.bigbluebutton.connections
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.google.gson.{Gson, JsonObject, JsonParser}
-import org.bigbluebutton.bus.{FromClientMsg, Red5AppsMsgBus}
+import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5AppsMsgBus}
 import org.bigbluebutton.common.messages.MessagingConstants
 import org.bigbluebutton.connections.Connection.UpdateMsg
-import org.bigbluebutton.endpoint.redis.RedisPublisher
 
 object Connection {
-  def props(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher, sessionToken: String,
+  def props(red5AppsBus: Red5AppsMsgBus, pubSubMessageBus: PubSubMessageBus, sessionToken: String,
             connectionId: String, state: ConnectionStateModel = new ConnectionStateModel): Props =
-    Props(classOf[Connection], bus, redisPublisher, sessionToken, connectionId, state)
+    Props(classOf[Connection], red5AppsBus, pubSubMessageBus, sessionToken, connectionId, state)
 
   case class UpdateMsg(a: Long)
 }
 
 
-class Connection(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher , sessionToken: String,
-                 connectionId: String, state: ConnectionStateModel) extends Actor with ActorLogging {
-  log.warning(s"Creating a new Connection: sessionToken=$sessionToken connectionId=$connectionId connectionTime=${state.getConnectionTime}")
+class Connection(red5AppsBus: Red5AppsMsgBus, pubSubMessageBus: PubSubMessageBus , sessionToken:
+String, connectionId: String, state: ConnectionStateModel) extends Actor with ActorLogging {
+  log.warning(s"Creating a new Connection: sessionToken=$sessionToken connectionId=$connectionId " +
+    s"connectionTime=${state.getConnectionTime}")
 
   override def preStart(): Unit = {
-    bus.subscribe(self, sessionToken)
+    red5AppsBus.subscribe(self, sessionToken)
     super.preStart()
   }
 
   override def postStop(): Unit = {
-    bus.unsubscribe(self, sessionToken)
+    red5AppsBus.unsubscribe(self, sessionToken)
     super.postStop()
   }
 
@@ -50,7 +50,8 @@ class Connection(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher , sessionTo
     log.info(s"ValidateAuthToken [$json]")
 
    // send to pubsub with replychannel
-    redisPublisher.publish(MessagingConstants.TO_MEETING_CHANNEL, json)
+//    redisPublisher.publish(MessagingConstants.TO_MEETING_CHANNEL, json)
+    // construct a PubSubMessage and send to PubSubMessageBus
   }
 
   private def handleClientConnected(msg: FromClientMsg): Unit = {
@@ -65,7 +66,9 @@ class Connection(bus: Red5AppsMsgBus, redisPublisher: RedisPublisher , sessionTo
   }
 
   private def handleTransitMessage(msg: FromClientMsg): Unit = {
-    redisPublisher.publish(MessagingConstants.FROM_BBB_APPS_PATTERN, msg.json)
+    //redisPublisher.publish(MessagingConstants.FROM_BBB_APPS_PATTERN, msg.json)
+
+    // construct a PubSubMessage and send to PubSubMessageBus
   }
 
   private def addReplyChannelToJsonMessage(message: String): String = {

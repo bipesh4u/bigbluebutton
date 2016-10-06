@@ -6,11 +6,10 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.{Matchers, WordSpecLike}
 
 import scala.concurrent.duration._
-import org.bigbluebutton.{MeetingTestFixtures, TestKitUsageSpec}
 import org.bigbluebutton.bus.{FromClientMsg, Red5AppsMsgBus}
 import org.bigbluebutton.connections.Connection.UpdateMsg
-import org.bigbluebutton.endpoint.redis.RedisPublisher
-import org.bigbluebutton.red5apps.{StopSystemAfterAll, SystemConfiguration}
+import org.bigbluebutton.bus.PubSubMessageBus
+import org.bigbluebutton.red5apps.{MeetingTestFixtures, StopSystemAfterAll, SystemConfiguration, TestKitUsageSpec}
 
 
 class Connection01Test extends TestKit(ActorSystem("Connection01Test", ConfigFactory.parseString
@@ -24,14 +23,14 @@ class Connection01Test extends TestKit(ActorSystem("Connection01Test", ConfigFac
   with SystemConfiguration {
 
   val eventBus = new Red5AppsMsgBus
-  val redisPublisher = new RedisPublisher(system)
+  val pubSubMessageBus = new PubSubMessageBus
 
   "A Connection Actor" should {
     "update the state of the connection when receiving ClientConnected" in {
       within(500 millis) {
         val state = new ConnectionStateModel()
 
-        val connectionActorRef = system.actorOf(Connection.props(eventBus, redisPublisher,
+        val connectionActorRef = system.actorOf(Connection.props(eventBus, pubSubMessageBus,
           "someSessionToken", "someConnectionId", state))
 
         val msg = FromClientMsg("ClientConnected", "somejson", "aaaa", "bbbb")
