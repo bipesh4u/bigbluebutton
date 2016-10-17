@@ -1,17 +1,17 @@
 package org.bigbluebutton.connections
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
-import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5AppsMsgBus}
+import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5MsgBus}
 
 import scala.collection.mutable
 
 object ConnectionsManager {
-  def props(system: ActorSystem, red5AppsMsgBus: Red5AppsMsgBus, pubSubMessageBus:
+  def props(system: ActorSystem, red5AppsMsgBus: Red5MsgBus, pubSubMessageBus:
   PubSubMessageBus): Props = Props(classOf[ConnectionsManager], system, red5AppsMsgBus,
     pubSubMessageBus)
 }
 
-class ConnectionsManager(system: ActorSystem, red5AppsMsgBus: Red5AppsMsgBus, pubSubMessageBus:
+class ConnectionsManager(system: ActorSystem, red5AppsMsgBus: Red5MsgBus, pubSubMessageBus:
 PubSubMessageBus) extends Actor with ActorLogging {
   log.warning("Creating a new ConnectionsManager warn")
 

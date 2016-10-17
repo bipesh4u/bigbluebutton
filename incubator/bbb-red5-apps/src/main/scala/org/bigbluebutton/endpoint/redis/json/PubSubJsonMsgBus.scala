@@ -1,3 +1,4 @@
+/*
 package org.bigbluebutton.endpoint.redis.json
 
 import akka.actor.ActorRef
@@ -29,3 +30,4 @@ class PubSubJsonMsgBus extends EventBus with LookupClassification {
   // used internally (i.e. the expected number of different classifiers)
   override protected def mapSize: Int = 128
 }
+*/

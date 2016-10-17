@@ -1,3 +1,4 @@
+/*
 package org.bigbluebutton.endpoint.redis
 
 import akka.actor.Props
@@ -18,3 +19,4 @@ class KeepAliveRedisPublisher(val system: ActorSystem, sender: RedisPublisher) e
     sender.publish("bigbluebutton:from-bbb-apps:keepalive", msg.toJson())
   }
 }
+ */

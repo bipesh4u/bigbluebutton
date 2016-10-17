@@ -3,22 +3,13 @@ package org.bigbluebutton.bus
 import akka.actor.ActorRef
 import akka.event.{EventBus, LookupClassification}
 
-trait PubSubMsgTrait
-
-case class PubSubMsg(topic: String, payload: PubSubMsgTrait)
-
-//case class FromClientMsg(name: String, json: String, connectionId: String, sessionToken: String) extends PubSubMsgTrait
-//case class ToClientMsg(payload: String) extends PubSubMsgTrait
-//case class FromPubSubJsonMsg(payload: String) extends PubSubMsgTrait
-//case class ToPubSubJsonMsg(payload: String) extends PubSubMsgTrait
-
 class PubSubMessageBus extends EventBus with LookupClassification {
   type Event = PubSubMsg
   type Classifier = String
   type Subscriber = ActorRef
 
   // is used for extracting the classifier from the incoming events
-  override protected def classify(event: Event): Classifier = event.topic
+  override protected def classify(event: Event): Classifier = event.channel
 
   // will be invoked for each event for all subscribers which registered themselves
   // for the event’s classifier

@@ -41,7 +41,7 @@ testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/sc
   * Install Scalatest (http://www.scalatest.org/install). Need to add ~/.sbt/0.13/global.sbt
   */
 libraryDependencies ++= {
-  val akkaVersion  = "2.3.14"
+  val akkaVersion  = "2.4.2"
   val akkaStreamV = "1.0"
   val scalaTestV  = "2.2.4"
   Seq(

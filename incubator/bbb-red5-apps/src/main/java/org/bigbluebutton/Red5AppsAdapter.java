@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.bigbluebutton.red5.util.Util.extractName;
+
 public class Red5AppsAdapter extends MultiThreadedApplicationAdapter {
 
     private static Logger log = Red5LoggerFactory.getLogger(Red5AppsAdapter.class, "bbbapps");
@@ -129,22 +131,6 @@ public class Red5AppsAdapter extends MultiThreadedApplicationAdapter {
         red5InGW.handle(inMsg);
 
         super.roomDisconnect(conn);
-    }
-
-    private String extractName(String json) {
-        JsonParser parser = new JsonParser();
-        JsonObject obj = (JsonObject) parser.parse(json);
-        String answer = "";
-
-        if (obj.has("header")) {
-            JsonObject header = (JsonObject) obj.get("header");
-
-            if (header.has("name")) {
-                String messageName = header.get("name").getAsString();
-                answer = messageName;
-            }
-        }
-        return answer;
     }
 
     public void messageFromClientRemoteCall(String json) {

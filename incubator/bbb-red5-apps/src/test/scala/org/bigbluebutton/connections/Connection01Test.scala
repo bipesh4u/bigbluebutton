@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.{Matchers, WordSpecLike}
 
 import scala.concurrent.duration._
-import org.bigbluebutton.bus.{FromClientMsg, Red5AppsMsgBus}
+import org.bigbluebutton.bus.{FromClientMsg, Red5MsgBus}
 import org.bigbluebutton.connections.Connection.UpdateMsg
 import org.bigbluebutton.bus.PubSubMessageBus
 import org.bigbluebutton.red5apps.{MeetingTestFixtures, StopSystemAfterAll, SystemConfiguration, TestKitUsageSpec}
@@ -22,7 +22,7 @@ class Connection01Test extends TestKit(ActorSystem("Connection01Test", ConfigFac
   with MeetingTestFixtures
   with SystemConfiguration {
 
-  val eventBus = new Red5AppsMsgBus
+  val eventBus = new Red5MsgBus
   val pubSubMessageBus = new PubSubMessageBus
 
   "A Connection Actor" should {

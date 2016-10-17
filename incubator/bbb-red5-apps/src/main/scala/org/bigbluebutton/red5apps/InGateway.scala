@@ -1,7 +1,7 @@
 package org.bigbluebutton.red5apps
 
 import akka.actor.ActorSystem
-import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5AppsMsg, Red5AppsMsgBus}
+import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5AppsMsg, Red5MsgBus}
 import org.bigbluebutton.connections.{ClientSenderActor, ConnectionsManager}
 import org.bigbluebutton.endpoint.redis.{AppsRedisSubscriberActor, RedisSenderActor}
 import org.bigbluebutton.{IRed5InGW, Red5OutGateway}
@@ -15,7 +15,7 @@ class InGateway(val red5OutGW: Red5OutGateway) extends IRed5InGW with SystemConf
   implicit val system = ActorSystem("red5-bbb-apps-system")
   println("*************** meetingManagerChannel " + meetingManagerChannel + " *******************")
 
-  val red5AppsMsgBus = new Red5AppsMsgBus
+  val red5AppsMsgBus = new Red5MsgBus
   val pubSubMessageBus = new PubSubMessageBus
 
   val redis = RedisClient(redisHost, redisPort)(system)

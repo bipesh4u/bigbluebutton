@@ -1,7 +1,7 @@
 package org.bigbluebutton.endpoint.redis
 
 import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
-import org.bigbluebutton.bus.{PubSubMessageBus, PubSubMsg, PubSubMsgTrait}
+import org.bigbluebutton.bus.{PubSubMessageBus, PubSubMsg, ToPubSubMsg}
 import redis.RedisClient
 
 
@@ -33,13 +33,13 @@ class RedisSenderActor(pubSubMessageBus: PubSubMessageBus, redis: RedisClient)
   }
 
   private def publish(channel: String, data: String) {
-    //println("PUBLISH TO [" + channel + "]: \n [" + data + "]")
+    println(s"PUBLISH TO [$channel]: \n [$data]")
     redis.publish(channel, data)
   }
 
   private def handlePubSubMsg(msg: PubSubMsg): Unit = {
-
-    // publish()
+    val json = msg.payload.asInstanceOf[ToPubSubMsg].json
+    publish(msg.channel, json)
   }
 
 

@@ -2,12 +2,12 @@ package org.bigbluebutton.connections
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.google.gson.{Gson, JsonObject, JsonParser}
-import org.bigbluebutton.bus.{FromClientMsg, PubSubMessageBus, Red5AppsMsgBus}
+import org.bigbluebutton.bus._
 import org.bigbluebutton.common.messages.MessagingConstants
 import org.bigbluebutton.connections.Connection.UpdateMsg
 
 object Connection {
-  def props(red5AppsBus: Red5AppsMsgBus, pubSubMessageBus: PubSubMessageBus, sessionToken: String,
+  def props(red5AppsBus: Red5MsgBus, pubSubMessageBus: PubSubMessageBus, sessionToken: String,
             connectionId: String, state: ConnectionStateModel = new ConnectionStateModel): Props =
     Props(classOf[Connection], red5AppsBus, pubSubMessageBus, sessionToken, connectionId, state)
 
@@ -15,7 +15,7 @@ object Connection {
 }
 
 
-class Connection(red5AppsBus: Red5AppsMsgBus, pubSubMessageBus: PubSubMessageBus , sessionToken:
+class Connection(red5AppsBus: Red5MsgBus, pubSubMessageBus: PubSubMessageBus, sessionToken:
 String, connectionId: String, state: ConnectionStateModel) extends Actor with ActorLogging {
   log.warning(s"Creating a new Connection: sessionToken=$sessionToken connectionId=$connectionId " +
     s"connectionTime=${state.getConnectionTime}")
@@ -49,9 +49,10 @@ String, connectionId: String, state: ConnectionStateModel) extends Actor with Ac
     val json = addReplyChannelToJsonMessage(msg.json)
     log.info(s"ValidateAuthToken [$json]")
 
+    val outMsg = ToPubSubMsg(msg.json)
+    pubSubMessageBus.publish(PubSubMsg(MessagingConstants.TO_BBB_APPS_PATTERN, outMsg))
    // send to pubsub with replychannel
 //    redisPublisher.publish(MessagingConstants.TO_MEETING_CHANNEL, json)
-    // construct a PubSubMessage and send to PubSubMessageBus
   }
 
   private def handleClientConnected(msg: FromClientMsg): Unit = {
@@ -66,9 +67,8 @@ String, connectionId: String, state: ConnectionStateModel) extends Actor with Ac
   }
 
   private def handleTransitMessage(msg: FromClientMsg): Unit = {
-    //redisPublisher.publish(MessagingConstants.FROM_BBB_APPS_PATTERN, msg.json)
-
-    // construct a PubSubMessage and send to PubSubMessageBus
+    val outMsg = ToPubSubMsg(msg.json)
+    pubSubMessageBus.publish(PubSubMsg(MessagingConstants.TO_BBB_APPS_PATTERN, outMsg))
   }
 
   private def addReplyChannelToJsonMessage(message: String): String = {

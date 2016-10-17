@@ -3,22 +3,12 @@ package org.bigbluebutton.bus
 import akka.actor.ActorRef
 import akka.event.{EventBus, LookupClassification}
 
-trait Red5AppsMsgTrait
-
-case class Red5AppsMsg(topic: String, payload: Red5AppsMsgTrait)
-
-case class FromClientMsg(name: String, json: String, connectionId: String, sessionToken: String)
-  extends Red5AppsMsgTrait
-case class ToClientMsg(payload: String) extends Red5AppsMsgTrait
-case class FromPubSubJsonMsg(payload: String) extends Red5AppsMsgTrait
-case class ToPubSubJsonMsg(payload: String) extends Red5AppsMsgTrait
-
-class Red5AppsMsgBus extends EventBus with LookupClassification {
+class Red5MsgBus extends EventBus with LookupClassification {
   type Event = Red5AppsMsg
   type Classifier = String
   type Subscriber = ActorRef
 
-  // is used for extracting the classifier from the incoming events  
+  // is used for extracting the classifier from the incoming events
   override protected def classify(event: Event): Classifier = event.topic
 
   // will be invoked for each event for all subscribers which registered themselves
@@ -35,4 +25,3 @@ class Red5AppsMsgBus extends EventBus with LookupClassification {
   // used internally (i.e. the expected number of different classifiers)
   override protected def mapSize: Int = 128
 }
-

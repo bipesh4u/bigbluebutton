@@ -47,6 +47,6 @@ sudo chmod -R 777 ${WEBAPPS_LOCATION}/${APPLICATION_NAME}
 sudo chown -R red5:red5 ${WEBAPPS_LOCATION}/${APPLICATION_NAME}
 
 # Dev only
-sudo service red5 restart
-sudo service tomcat7 restart
+#sudo service red5 restart
+#sudo service tomcat7 restart
 
