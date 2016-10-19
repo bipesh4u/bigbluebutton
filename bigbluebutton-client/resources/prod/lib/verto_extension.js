@@ -11,30 +11,25 @@ Verto = function (
   this.share_call = null;
   this.vertoHandle;
 
-  this.vid_width = 1920;
-  this.vid_height = 1080;
+  this.vid_width = window.screen.width;
+  this.vid_height = window.screen.height;
 
-  this.local_vid_width = 320;
-  this.local_vid_height = 180;
-  this.outgoingBandwidth;
-  this.incomingBandwidth;
-  this.sessid = null;
+  this.outgoingBandwidth = "default";
+  this.incomingBandwidth = "default";
+  this.sessid = $.verto.genUUID();
 
   this.renderTag = 'remote-media';
 
   this.destination_number = voiceBridge;
   this.caller_id_name = conferenceUsername;
-  this.caller_id_number = conferenceIdNumber;
+  // this.caller_id_number = conferenceIdNumber;
+  this.caller_id_number = conferenceUsername;
 
   this.vertoPort = "8082";
   this.hostName = window.location.hostname;
   this.socketUrl = 'wss://' + this.hostName + ':' + this.vertoPort;
   this.login = "bbbuser";
   this.password = "secret";
-  this.minWidth = '640';
-  this.minHeight = '480';
-  this.maxWidth = '1920';
-  this.maxHeight = '1080';
 
   this.useVideo = false;
   this.useCamera = false;
@@ -149,6 +144,7 @@ Verto.prototype.hangup = function () {
   if (this.share_call) {
     // the duration of the call
     this.logger('call ended ' + this.share_call.audioStream.currentTime);
+    this.share_call.rtc.localStream.getTracks().forEach(track => track.stop());
     this.share_call.hangup();
     this.share_call = null;
   }
@@ -192,8 +188,8 @@ Verto.prototype.vmute = function () {
 Verto.prototype.setWatchVideo = function (tag) {
   this.mediaCallback = this.docall;
   this.useVideo = true;
-  this.useCamera = 'none';
-  this.useMic = 'none';
+  this.useCamera = 'none'; // temp
+  this.useMic = 'any'; // temp
   this.create(tag);
 };
 
@@ -221,7 +217,9 @@ Verto.prototype.setScreenShare = function (tag) {
 Verto.prototype.create = function (tag) {
   this.setRenderTag(tag);
   this.registerCallbacks();
-  this.configStuns(this.init);
+  //this.configStuns(this.init);
+  this.iceServers = true;
+  this.init();
 };
 
 Verto.prototype.docall = function () {
@@ -273,26 +271,18 @@ Verto.prototype.makeShare = function () {
       return;
     }
 
-    getChromeExtensionStatus(this.chromeExtension, function (status) {
-      if (status != 'installed-enabled') {
-        _this.logError('No chrome Extension');
+    // bring up Chrome screen picker
+    getMyScreenConstraints(function (constraints) {
+      if (constraints == null || constraints == "" || constraints.streamId == null || constraints.streamId == "") {
         _this.onFail();
-        return -1;
+        return _this.logError(constraints);
       }
 
-      // bring up Chrome screen picker
-      getScreenConstraints(function (error, screenConstraints) {
-        if (error) {
-          _this.onFail();
-          return _this.logError(error);
-        }
+      screenInfo = constraints.streamId;
 
-        screenInfo =  screenConstraints.mandatory;
-
-        _this.logger(screenInfo);
-        _this.doShare(screenInfo);
-      });
-    });
+      _this.logger(screenInfo);
+      _this.doShare(screenInfo);
+    }, _this.chromeExtension);
   }
 };
 
@@ -301,15 +291,40 @@ Verto.prototype.doShare = function (screenConstraints) {
     destination_number: this.destination_number,
     caller_id_name: this.caller_id_name,
     caller_id_number: this.caller_id_number,
-    outgoingBandwidth: this.outgoingBandwidth,
-    incomingBandwidth: this.incomingBandwidth,
-    videoParams: screenConstraints,
+    outgoingBandwidth: "default",
+    incomingBandwidth: "default",
+    videoParams: {
+      chromeMediaSource: "desktop",
+      chromeMediaSourceId: screenConstraints,
+      maxWidth: this.vid_width,
+      maxHeight: this.vid_height
+    },
     useVideo: true,
     screenShare: true,
+
+    useCamera: 'any',
+    useMic: 'any',
+    useSpeak: 'any',
+
     dedEnc: true,
     mirrorInput: false,
     tag: this.renderTag,
   });
+
+  var stopSharing = function() {
+    console.log("stopSharing");
+    this.share_call.hangup();
+    this.share_call = null;
+  };
+
+  var _this = this;
+  // Override onStream callback in $.FSRTC instance
+  this.share_call.rtc.options.callbacks.onStream = function (rtc, stream) {
+    if (stream) {
+      var StreamTrack = stream.getVideoTracks()[0];
+      StreamTrack.addEventListener('ended', stopSharing.bind(_this));
+    }
+  };
 };
 
 Verto.prototype.init = function () {
@@ -317,6 +332,7 @@ Verto.prototype.init = function () {
 
   if (!window.vertoHandle) {
     window.vertoHandle = new $.verto({
+      useVideo: true,
       login: this.login,
       passwd: this.password,
       socketUrl: this.socketUrl,
@@ -324,10 +340,6 @@ Verto.prototype.init = function () {
       ringFile: 'sounds/bell_ring2.wav',
       sessid: this.sessid,
       videoParams: {
-        minWidth: this.vid_width,
-        minHeight: this.vid_height,
-        maxWidth: this.vid_width,
-        maxHeight: this.vid_height,
         minFrameRate: 15,
         vertoBestFrameRate: 30,
       },
@@ -478,6 +490,11 @@ window.vertoExitAudio = function () {
   window.vertoManager.exitAudio();
 };
 
+window.vertoExitVideo = function () {
+  window.vertoInitialize();
+  window.vertoManager.exitVideo();
+};
+
 window.vertoExitScreenShare = function () {
   window.vertoInitialize();
   window.vertoManager.exitScreenShare();
@@ -506,4 +523,56 @@ window.vertoShareScreen = function () {
 window.vertoExtensionGetChromeExtensionStatus = function (extensionid, callback) {
   callback = Verto.normalizeCallback(callback);
   getChromeExtensionStatus(extensionid, callback);
+};
+
+// a function to check whether the browser (Chrome only) is in an isIncognito
+// session. Requires 1 mandatory callback that only gets called if the browser
+// session is incognito. The callback for not being incognito is optional.
+// Attempts to retrieve the chrome filesystem API.
+window.checkIfIncognito = function(isIncognito, isNotIncognito = function () {}) {
+  isIncognito = Verto.normalizeCallback(isIncognito);
+  isNotIncognito = Verto.normalizeCallback(isNotIncognito);
+
+  var fs = window.RequestFileSystem || window.webkitRequestFileSystem;
+  if (!fs) {
+    isNotIncognito();
+    return;
+  }
+  fs(window.TEMPORARY, 100, function(){isNotIncognito()}, function(){isIncognito()});
+};
+
+window.checkChromeExtInstalled = function (callback, chromeExtensionId) {
+  callback = Verto.normalizeCallback(callback);
+
+  if (typeof chrome === "undefined" || !chrome || !chrome.runtime) {
+    // No API, so no extension for sure
+    callback(false);
+    return;
+  }
+  chrome.runtime.sendMessage(
+    chromeExtensionId,
+    { getVersion: true },
+    function (response) {
+      if (!response || !response.version) {
+        // Communication failure - assume that no endpoint exists
+        callback(false);
+        return;
+      }
+      callback(true);
+    }
+  );
+}
+
+window.getMyScreenConstraints = function(theCallback, extensionId) {
+  theCallback = Verto.normalizeCallback(theCallback);
+  chrome.runtime.sendMessage(extensionId, {
+    getStream: true,
+    sources: [
+      "window",
+      "screen"
+    ]},
+    function(response) {
+      console.log(response);
+      theCallback(response);
+   });
 };

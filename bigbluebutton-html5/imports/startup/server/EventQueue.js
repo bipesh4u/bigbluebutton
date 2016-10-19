@@ -149,7 +149,9 @@ const handledMessageTypes = [
   'poll_stopped_message',
   'user_voted_poll_message',
   'get_all_meetings_reply_message',
+  'desk_share_notify_viewers_rtmp',
   'send_caption_history_reply_message',
   'edit_caption_history_message',
   'update_caption_owner_message',
 ];
+
