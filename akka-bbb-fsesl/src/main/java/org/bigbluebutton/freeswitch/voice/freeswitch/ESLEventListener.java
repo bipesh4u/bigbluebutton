@@ -229,8 +229,11 @@ public class ESLEventListener implements IEslEventListener {
     
     @Override
     public void eventReceived(EslEvent event) {
-        System.out.println("ESL Event Listener received event=[" + event.getEventName() + "]" +
-                event.getEventHeaders().toString());
+
+      // System.out.println("__event=");
+      if (!event.getEventName().equals("HEARTBEAT")) {
+        System.out.println("ESL Event Listener received event=[" + event.getEventName() + "]" + event.getEventHeaders().toString());
+      }
 //        if (event.getEventName().equals(FreeswitchHeartbeatMonitor.EVENT_HEARTBEAT)) {
 ////           setChanged();
 //           notifyObservers(event);

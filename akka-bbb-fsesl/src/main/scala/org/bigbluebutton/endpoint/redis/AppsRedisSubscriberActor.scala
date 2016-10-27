@@ -54,7 +54,7 @@ class AppsRedisSubscriberActor(val system: ActorSystem, msgReceiver: RedisMessag
   }
 
   def onPMessage(pmessage: PMessage) {
-    log.debug(s"pattern message received: $pmessage")
+    // log.debug(s"pattern message received: $pmessage")
 
     val msg = decoder.decodeMessage(pmessage.data)
 
@@ -65,7 +65,7 @@ class AppsRedisSubscriberActor(val system: ActorSystem, msgReceiver: RedisMessag
             lastPongReceivedOn = System.currentTimeMillis()
           }
         }
-        case _ => // do nothing
+        case _ => log.debug(s"pattern message received: $pmessage") // do nothing
       }
     } else {
       msgReceiver.handleMessage(pmessage.patternMatched, pmessage.channel, pmessage.data)
@@ -77,3 +77,4 @@ class AppsRedisSubscriberActor(val system: ActorSystem, msgReceiver: RedisMessag
     log.warning("**** TODO: Handle pubsub messages. ****")
   }
 }
+
