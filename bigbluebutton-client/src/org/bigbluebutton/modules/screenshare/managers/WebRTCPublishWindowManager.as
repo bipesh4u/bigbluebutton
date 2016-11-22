@@ -64,9 +64,17 @@ package org.bigbluebutton.modules.screenshare.managers
 			closeWindow(shareWindow);
 		}
 
-		private function openWindow(window:IBbbModuleWindow):void {
+		public function openWindow(window:IBbbModuleWindow = null):void {
 			var event:OpenWindowEvent = new OpenWindowEvent(OpenWindowEvent.OPEN_WINDOW_EVENT);
-			event.window = window;
+
+			if (window == null) {
+				shareWindow = new WebRTCDesktopPublishWindow();
+				shareWindow.visible = true;
+				event.window = shareWindow;
+			} else {
+				event.window = window;
+			}
+
 			globalDispatcher.dispatchEvent(event);
 		}
 
