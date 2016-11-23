@@ -46,7 +46,7 @@ package org.bigbluebutton.main.model
 				webcam = false;
 			}
 			
-			vxml = BBB.getConfigForModule("DeskShareModule");
+			vxml = BBB.getConfigForModule("ScreenshareModule");
 			if (vxml == null) {
 				deskshare = false;
 			}

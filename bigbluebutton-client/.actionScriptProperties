@@ -22,7 +22,7 @@
   <modules>
     <module application="src/BigBlueButton.mxml" destPath="ChatModule.swf" optimize="true" sourcePath="src/ChatModule.mxml"/>
     <module application="src/BigBlueButton.mxml" destPath="UsersModule.swf" optimize="true" sourcePath="src/UsersModule.mxml"/>
-    <module application="src/BigBlueButton.mxml" destPath="DeskShareModule.swf" optimize="true" sourcePath="src/DeskShareModule.mxml"/>
+    <module application="src/BigBlueButton.mxml" destPath="ScreenshareModule.swf" optimize="true" sourcePath="src/ScreenshareModule.mxml"/>
     <module application="src/BigBlueButton.mxml" destPath="PhoneModule.swf" optimize="true" sourcePath="src/PhoneModule.mxml"/>
     <module application="src/BigBlueButton.mxml" destPath="VideoconfModule.swf" optimize="true" sourcePath="src/VideoconfModule.mxml"/>
     <module application="src/BigBlueButton.mxml" destPath="WhiteboardModule.swf" optimize="true" sourcePath="src/WhiteboardModule.mxml"/>

@@ -19,7 +19,7 @@ The default tab order (necessary for accessibility) is hard-coded into these mod
 If you want to change the tab order for BigBlueButton , check resources/config.xml.template and it to src/conf/config.xml.
 Certain modules must have the baseTabIndex property, and for the default tab order, their values should be as follows:  
 
-	101: DeskShareModule	(Desktop sharing module)
+	101: ScreenShareModule	(Desktop sharing module)
 	101: VideoconfModule	(Webcam publishing window)
 	201: ViewersModule		(Viewers list window)
 	301: ListenersModule	(Listeners list window)
