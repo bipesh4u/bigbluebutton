@@ -17,8 +17,9 @@
 *
 */
 
-package org.bigbluebutton.modules.screenshare.services.red5
+package org.bigbluebutton.modules.webrtcscreenshare.services.red5
 {
+import org.bigbluebutton.modules.screenshare.services.red5.*;
 	import com.asfusion.mate.events.Dispatcher;
 
 	import flash.events.AsyncErrorEvent;
@@ -39,7 +40,7 @@ package org.bigbluebutton.modules.screenshare.services.red5
 	import org.bigbluebutton.core.managers.ReconnectionManager;
 	import org.bigbluebutton.main.events.BBBEvent;
 	import org.bigbluebutton.modules.screenshare.events.WebRTCViewStreamEvent;
-	import org.bigbluebutton.core.managers.ConnectionManager;
+    import org.bigbluebutton.core.managers.ConnectionManager;
 
 	public class WebRTCConnection {
 	private static const LOGGER:ILogger = getClassLogger(Connection);

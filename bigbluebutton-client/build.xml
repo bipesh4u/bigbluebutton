@@ -24,6 +24,7 @@
 	<property name="CHAT" value="ChatModule" />
 	<property name="PRESENT" value="PresentModule" />
 	<property name="SCREENSHARE" value="ScreenshareModule" />
+	<property name="WEBRTCSCREENSHARE" value="WebRTCScreenshareModule" />
 	<property name="SCREENSHARE_SA" value="ScreenshareStandalone" />
 	<property name="CAM_PREVIEW_SA" value="WebcamPreviewStandalone" />
 	<property name="MICROPHONE_CHECK" value="MicrophoneCheck" />
@@ -243,7 +244,12 @@
     <echo message="Compiling Connection Check Application." />
     <build-module-no-link src="${SRC_DIR}" target="${CONNECTION_CHECK}" />
   </target>
-	
+
+  <target name="build-webrtc-screenshare" description="Compile WebRTCScreenshare Module">
+    <build-module src="${SRC_DIR}" target="${WEBRTCSCREENSHARE}" />
+    <echo message="Build WebRTCScreenshare Module" />
+  </target>
+
   <target name="build-screenshare" description="Compile Screenshare Module">
     <build-module src="${SRC_DIR}" target="${SCREENSHARE}" />
     <echo message="Copying deskshare applet for Screenshare Module" />
