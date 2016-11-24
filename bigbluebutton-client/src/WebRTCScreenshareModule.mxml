@@ -24,10 +24,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
            implements="org.bigbluebutton.common.IBigBlueButtonModule"
            creationComplete="onCreationComplete()"
-           xmlns:maps1="org.bigbluebutton.modules.webrtcscreenshare.maps.*">
+           xmlns:maps="org.bigbluebutton.modules.webrtcscreenshare.maps.*">
 
-  <maps1:WebRTCScreenshareEventMap id="webrtcScreenshareGlobalEventMap" />
-  <maps1:WebRTCScreenshareEventMap id="webRTCScreenshareEventMap" />
+  <maps:WebRTCScreenshareEventMap id="webRTCScreenshareEventMap" />
 
   <mx:Script>
     <![CDATA[

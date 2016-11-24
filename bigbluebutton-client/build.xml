@@ -292,7 +292,7 @@
 
 	<!-- just a grouping of modules to compile -->
 	<target name="build-screenshare-phone-video-whiteboard-dyn" 
-			depends="build-screenshare, build-phone, build-video, build-whiteboard, build-notes, build-polling"
+			depends="build-screenshare, build-phone, build-video, build-whiteboard, build-notes, build-polling, build-webrtc-screenshare"
 			description="Compile screenshare, phone, video, whiteboard modules">
 	</target>
 
