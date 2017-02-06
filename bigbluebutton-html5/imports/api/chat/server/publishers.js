@@ -18,7 +18,7 @@ Meteor.publish('chat', (credentials) => {
   check(requesterUserId, String);
   check(requesterToken, String);
 
-  Logger.info(`Publishing chat for ${meetingId} ${requesterUserId} ${requesterToken}`);
+  Logger.debug(`Publishing chat for ${meetingId} ${requesterUserId} ${requesterToken}`);
 
   return Chat.find({
     $or: [

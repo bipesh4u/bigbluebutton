@@ -5,7 +5,7 @@ import { logger } from '/imports/startup/server/logger';
 Meteor.publish('captions', function (credentials) {
   if (isAllowedTo('subscribeCaptions', credentials)) {
     const { meetingId, requesterUserId, requesterToken } = credentials;
-    logger.info(`publishing captions for ${meetingId} ${requesterUserId} ${requesterToken}`);
+    logger.debug(`publishing captions for ${meetingId} ${requesterUserId} ${requesterToken}`);
 
     return Captions.find({
       meetingId: meetingId,

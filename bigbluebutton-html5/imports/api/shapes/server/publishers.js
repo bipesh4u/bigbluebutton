@@ -16,7 +16,7 @@ Meteor.publish('shapes', (credentials) => {
   check(requesterUserId, String);
   check(requesterToken, String);
 
-  Logger.info(`Publishing Shapes for ${meetingId} ${requesterUserId} ${requesterToken}`);
+  Logger.debug(`Publishing Shapes for ${meetingId} ${requesterUserId} ${requesterToken}`);
 
   return Shapes.find({ meetingId });
 });

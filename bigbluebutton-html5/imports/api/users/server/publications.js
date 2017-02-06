@@ -10,7 +10,7 @@ Meteor.publish('users', function (credentials) {
   const userid = credentials.requesterUserId;
   const authToken = credentials.requesterToken;
 
-  logger.info(`attempt publishing users for ${meetingId}, ${userid}, ${authToken}`);
+  // logger.debug(`attempt publishing users for ${meetingId}, ${userid}, ${authToken}`);
   const userObject = Users.findOne({
     userId: userid,
     meetingId: meetingId,
@@ -19,7 +19,7 @@ Meteor.publish('users', function (credentials) {
   if (!!userObject && !!userObject.user) {
     let username = 'UNKNOWN';
     if (isAllowedTo('subscribeUsers', credentials)) {
-      logger.info(`${userid} was allowed to subscribe to 'users'`);
+      // logger.debug(`${userid} was allowed to subscribe to 'users'`);
       username = userObject.user.name;
 
       // offline -> online
@@ -44,7 +44,7 @@ Meteor.publish('users', function (credentials) {
     }
   } else { //subscribing before the user was added to the collection
     Meteor.call('validateAuthToken', credentials);
-    logger.info(`Sending validateAuthTokenthere for user ${userid} in ${meetingId}.`);
+    logger.debug(`Sending validateAuthTokenthere for user ${userid} in ${meetingId}.`);
     return getUsers(meetingId);
   }
 });

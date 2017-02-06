@@ -122,6 +122,7 @@ export function isAllowedTo(action, credentials) {
   const userId = credentials.requesterUserId;
   const authToken = credentials.requesterToken;
 
+  const logString = `--${action} by ${userId} in ${meetingId}`;
   const user = Users.findOne({
     meetingId,
     userId,
@@ -139,24 +140,24 @@ export function isAllowedTo(action, credentials) {
 
     // check role specific actions
     if ('MODERATOR' === user.user.role) {
-      logger.debug('user permissions moderator case');
+      // logger.debug('user permissions moderator case' + logString);
       result = result || moderator[action];
     } else if ('VIEWER' === user.user.role) {
-      logger.debug('user permissions viewer case');
+      // logger.debug('user permissions viewer case' + logString);
       result = result || viewer(meetingId, userId)[action];
     }
 
     // check presenter actions
-    if (user.user.presenter) {
-      logger.debug('user permissions presenter case');
+    if (user.user.presenter && !result) {
+      // logger.debug('user permissions presenter case' + logString);
       result = result || presenter[action];
     }
 
-    logger.debug(`attempt from userId=${userId} to perform:${action}, allowed=${result}`);
+    // logger.debug(`userPermissions ${logString} allowed=${result}`);
 
     return result;
   } else {
-    logger.error(`FAILED due to permissions:${action} ${JSON.stringify(credentials)}`);
+    logger.warn(`FAILED due to permissions:${logString} ${JSON.stringify(credentials)}`);
     return false;
   }
 

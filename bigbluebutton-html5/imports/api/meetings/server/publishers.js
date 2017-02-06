@@ -10,7 +10,7 @@ Meteor.publish('meetings', (credentials) => {
   check(requesterUserId, String);
   check(requesterToken, String);
 
-  Logger.info(`Publishing meeting=${meetingId} ${requesterUserId} ${requesterToken}`);
+  Logger.debug(`Publishing meeting=${meetingId} ${requesterUserId} ${requesterToken}`);
 
   return Meetings.find({
     meetingId,

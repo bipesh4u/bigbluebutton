@@ -16,7 +16,7 @@ Meteor.publish('slides', (credentials) => {
   check(requesterUserId, String);
   check(requesterToken, String);
 
-  Logger.info(`Publishing Slides for ${meetingId} ${requesterUserId} ${requesterToken}`);
+  Logger.debug(`Publishing Slides for ${meetingId} ${requesterUserId} ${requesterToken}`);
 
   return Slides.find({ meetingId });
 });
