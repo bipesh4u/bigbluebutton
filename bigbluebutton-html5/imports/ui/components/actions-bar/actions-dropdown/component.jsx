@@ -20,6 +20,7 @@ const intlMessages = defineMessages({
     id: 'app.actionsBar.actionsDropdown.initPollLabel',
     defaultMessage: 'Initiate a poll',
   },
+
   desktopShareLabel: {
     id: 'app.actionsBar.actionsDropdown.desktopShareLabel',
     defaultMessage: 'Share your screen',
@@ -56,7 +57,7 @@ class ActionsDropdown extends Component {
         <DropdownTrigger>
           <Button
             label={intl.formatMessage(intlMessages.actionsLabel)}
-            icon="add"
+            icon="plus"
             color="primary"
             size="lg"
             circle={true}
