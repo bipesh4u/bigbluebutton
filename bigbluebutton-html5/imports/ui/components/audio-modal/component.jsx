@@ -1,10 +1,5 @@
 import React from 'react';
-import Icon from '/imports/ui/components/icon/component';
-import Button from '/imports/ui/components/button/component';
 import ModalBase from '../modal/base/component';
-import { clearModal } from '/imports/ui/components/app/service';
-import classNames from 'classnames';
-import ReactDOM from 'react-dom';
 import styles from './styles.scss';
 import JoinAudio from './join-audio/component';
 import ListenOnly from './listen-only/component';

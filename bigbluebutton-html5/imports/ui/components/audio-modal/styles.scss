@@ -7,18 +7,13 @@
 }
 
 .closeBtn {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-}
-
-// Modifies the close button style
-Button.closeBtn span:first-child {
-  color: $color-gray-light;
-  background: none;
-  background-color: $color-primary;
+  background-color: #FFFFFF;
   border: none;
-  box-shadow: none;
+  display: flex;
+  justify-content: flex-end;
+  i {
+    color: $color-gray-dark;
+  }
 }
 
 // Modifies the audio button icon colour
@@ -47,7 +42,6 @@ Button.audioBtn:first-of-type {
 .inner {
   padding: 10px;
   min-height: 350px;
-  min-width: 500px;
 }
 
 // Audio settings menu
