@@ -2,7 +2,8 @@
 
 .center {
   text-align: center;
-  font-size: $font-size-large;
+  font-size: 1.6rem;
+  font-weight: 500;
   padding-top: 40px;
 }
 
@@ -16,12 +17,18 @@
   }
 }
 
+Button.audioBtn {
+  i{
+    color: #3c5764;
+  }
+}
+
 // Modifies the audio button icon colour
 Button.audioBtn span:first-child {
-  color: #25385D;
-  border: 5px solid $color-white;
-  background-color: $color-primary;
+  color: #1b3c4b;
+  background-color: #f1f8ff;
   box-shadow: none;
+  border: 5px solid  #f1f8ff;
 }
 
 // When hovering over a button of class audioBtn, change the border colour of first span-child
@@ -32,7 +39,8 @@ Button.audioBtn:hover span:first-child {
 // Modifies the button label text
 Button.audioBtn span:last-child {
   color: $color-gray-dark;
-  font-size: 30%;
+  font-size: 40%;
+  font-weight: 500;
 }
 
 Button.audioBtn:first-of-type {
@@ -78,8 +86,6 @@ div.half label {
   border: none;
   box-shadow: none;
 }
-
-
 
 .containerLeftHalf {
   width: 50%;
